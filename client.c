@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
-
+//enum for console colors
 enum theme
 {
     white,
@@ -14,27 +14,23 @@ enum theme
     green
 };
 
-const char *THEME_NAMES[5] = {"white",
-                              "red",
-                              "blue",
-                              "green"};
+//theme codes for console colors
 const char *THEME_CODES[5] = {"\033[37m",
                               "\033[31m",
                               "\033[34m",
                               "\033[32m"};
-const char *CLEAR_CODE = "\033[0m";
-
-char *currentThemeCode = "\033[37m";
-int currentTheme = white;
+const char *CLEAR_CODE = "\033[0m"; //clears all console formatting
 
 const char INPUT_ERROR[] = "Please enter a valid move!\nMoves are att, def, gun\n\n";
 const char *MOVES[] = {"att",
                        "def",
                        "gun"};
 
-bool gameOver = false;
-char *gunCommand = "gun 1";
+bool gameOver = false; //true when game over
+char *gunCommand = "gun 1"; // ``` Temporary placeholder ``` ///
 
+//gets user input and deals with error checking
+//remember to free the returned string
 char *getUserInput()
 {
     char buffer[7]; // input size of 5 + \n + \0
@@ -78,7 +74,7 @@ int main(int argc, char *argv[])
 {
     while (!gameOver)
     {
-        char *ret = getUserInput();
+        char *ret = getUserInput(); //Remember to free !!
         printf("%s is a valid move\n", ret);
         free(ret);
         ret = NULL;
