@@ -34,20 +34,21 @@ char *gunCommand = "gun 1"; // ``` Temporary placeholder ``` ///
 char *getUserInput()
 {
     char buffer[7]; // input size of 5 + \n + \0
-    char *ret = (char *)malloc(6);
+    char *ret = (char *)malloc(6); // 5 + \0
 
     while (1)
     {
         printf("%s<move> <player target> %sEnter your move: %s", THEME_CODES[blue], THEME_CODES[green], THEME_CODES[red]);
 
         fgets(buffer, 7, stdin);
-        buffer[5] = '\0';
+        buffer[5] = '\0'; //remove the \n from string 
         printf("%s", CLEAR_CODE); // clear text formatting
-        for (int i = 0; i < 3; i++)
+
+        for (int i = 0; i < 3; i++) //match input to moves
         {
             if (strncmp(buffer, MOVES[i], 3) == 0)
             {
-                if (buffer[4] >= 49 && buffer[4] <= 52)
+                if (buffer[4] >= 49 && buffer[4] <= 52) //match input to valid target
                 {
                     strcpy(ret, buffer);
                     return ret;
@@ -66,7 +67,7 @@ char *getUserInput()
                 }
             }
         }
-        printf("%s%s%s", THEME_CODES[red], INPUT_ERROR, CLEAR_CODE);
+        printf("%s%s%s", THEME_CODES[red], INPUT_ERROR, CLEAR_CODE); //print error and moves
     }
 }
 
