@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
+
 enum theme
 {
     white,
