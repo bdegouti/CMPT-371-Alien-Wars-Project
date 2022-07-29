@@ -12,11 +12,15 @@
 #define Port_Num 9090
 
 //connect client to server
+// set ipAdr by user or automatically to local?
 int clientSocket (char* ipAdr) {
     int cltSock;
     struct sockaddr_in cltAdr;
 
-    if((cltSock = socket(PF_INET, SOCK_STREAM, 0)) == -1){ printf("error sock");}
+    if((cltSock = socket(PF_INET, SOCK_STREAM, 0)) == -1){
+        perror("Socket Creation");
+        exit(EXIT_FAILURE);
+    }
 
     memset(&cltAdr, 0, sizeof(cltAdr));
     cltAdr.sin_family = AF_INET;
@@ -24,7 +28,10 @@ int clientSocket (char* ipAdr) {
     cltAdr.sin_addr.s_addr = inet_addr(ipAdr);
     cltAdr.sin_port = htons(Port_Num);
 
-    if(connect(cltSock, (struct sockaddr*)&cltAdr, sizeof(cltAdr)) == -1) {printf("error connect");}
+    if(connect(cltSock, (struct sockaddr*)&cltAdr, sizeof(cltAdr)) == -1) {
+        perror("Socket Connection");
+        exit(EXIT_FAILURE);
+    }
     return cltSock; //returns the socket
 }
 
