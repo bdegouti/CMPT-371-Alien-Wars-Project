@@ -9,25 +9,6 @@
 #include <stdio.h>
 
 #define BUF_SIZE 100
-#define DATA_PAYLOAD 255
-
-////////////////////
-////API Example/////
-////////////////////
-enum ttype {
-    conn = 10,
-    act = 20,
-    over = 30
-};
-
-typedef struct Message {
-	int direct; // 0 for S->C 1 for C->S
-    enum ttype type; //types of data in enum
-    char message[DATA_PAYLOAD]; //data that contains action or gamestate
-}message; 
-////////////////////
-////API Example/////
-////////////////////
 
 //connect client to server
 int clientSocket (int portN) {
