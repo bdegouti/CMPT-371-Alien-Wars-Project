@@ -72,9 +72,9 @@ void deletePlayerQueue(struct PlayerQueue* pq){
     free(pq);
 }
 
-struct Player* createPlayer(char* name){
+struct Player* createPlayer(int num){
     struct Player* p = (struct Player*) malloc(sizeof(struct Player));
-    strcpy(p->name, name);
+    p->num = num;
     p->gun = DEFAULT_GUN;
     p->health = DEFAULT_HEALTH;
     p->queue = createPlayerQueue();
@@ -90,7 +90,7 @@ struct Game* initGamestate() {
     gameState->gameover = false;
     gameState->gunlocked = false;
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
-        gameState->players[i] = initPlayer();
+        gameState->players[i] = createPlayer(i+1); 
     }
     return gameState;
 }
@@ -100,6 +100,38 @@ void endGamestate(struct Game* g){
         deletePlayer(g->players[i]);
     }
     free(g);
+}
+
+void addActionToPlayer(struct Game* g, int playerNum, char* action, int target){
+    if(playerNum-1 < NUM_OF_PLAYERS){
+        enqueueNewTask(g->players[playerNum-1], action, target);
+    }
+}
+
+struct Action* getCurrentActionForPlayer(struct Game* g, int playerNum){
+    if(playerNum-1 < NUM_OF_PLAYERS){
+        struct Action* a = (struct Action*) malloc(sizeof(struct Action));
+        struct ListNode* ln = dequeueCurrentTask(g->players[playerNum-1]);
+        free(ln);
+        a->action = ln->action;
+        a->target = ln->target;
+        return a;
+    }
+    return NULL;
+}
+
+// Applies the task and updates the queue of the player
+void applyTask(struct Game* g, struct Player* p, struct Action* a){
+    if(a->action == "attack"){
+        g->players[a->target]->health -= 10;
+        if(g->players[a->target]->health == 0){
+            deletePlayer(g->players[a->target]);
+        }
+    } else if(a->action == "defense"){
+        p->health += 10;
+    } else if(a->action == "boost"){
+        p->gun++;
+    }
 }
 
 /*
@@ -134,20 +166,3 @@ int getRecieveSocketForPlayer(struct Game* g, int playerNum){
 }
 */
 
-void addActionToPlayer(struct Game* g, int playerNum, char* action, int target){
-    if(playerNum-1 < NUM_OF_PLAYERS){
-        enqueueNewTask(g->players[playerNum-1], action, target);
-    }
-}
-
-struct Action* getCurrentActionForPlayer(struct Game* g, int playerNum){
-    if(playerNum-1 < NUM_OF_PLAYERS){
-        struct Action* a = (struct Action*) malloc(sizeof(struct Action));
-        struct ListNode* ln = dequeueCurrentTask(g->players[playerNum-1]);
-        free(ln);
-        a->action = ln->action;
-        a->target = ln->target;
-        return a;
-    }
-    return NULL;
-}

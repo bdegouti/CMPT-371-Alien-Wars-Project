@@ -19,7 +19,7 @@ struct PlayerQueue {
 };
 
 struct Player {
-    char* name;
+    int num;
     //int sendSocket, recieveSocket;
     struct PlayerQueue* queue;
     int health;
@@ -75,7 +75,7 @@ void deletePlayerQueue(struct PlayerQueue* pq);
 /*
  * Creates and returns Player structure
  */
-struct Player* createPlayer(char* name);
+struct Player* createPlayer(int name);
 
 /*
  *deletes player structure and frees memory in self and substructures
