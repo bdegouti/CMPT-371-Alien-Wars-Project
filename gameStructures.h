@@ -5,16 +5,13 @@
 #define NUM_OF_PLAYERS 4
 #define DEFAULT_GUN 0
 #define DEFAULT_HEALTH 100
-
-struct ListNode {
-    char* action;
-    int target;
-    struct ListNode *next;
-};
+#define MAX_GUN_FILL 5
+#define BOOST_COUNT_START 5
+#define BOOST_COUNT_END 5
 
 struct PlayerQueue {
-    struct ListNode* head;
-    struct ListNode* tail;
+    struct Action* head;
+    struct Action* tail;
     int size;
 };
 
@@ -24,6 +21,8 @@ struct Player {
     struct PlayerQueue* queue;
     int health;
     int gun;
+    bool isBoostActive;
+    int boostCount;
 };
 
 struct Game {
@@ -35,6 +34,7 @@ struct Game {
 struct Action {
     char* action;
     int target;
+    struct Action *next;
 };
 
 /*
@@ -50,7 +50,7 @@ struct PlayerQueue* createPlayerQueue(){
  * initialize it with the item value.
  * Return a pointer to the new node.
  */
-struct ListNode* createNode(char* action, int target);
+struct Action* createNode(char* action, int target);
 
 /*
  * Insert node with specified item at the tail of the list.
@@ -60,7 +60,7 @@ void enqueueNewTask (struct PlayerQueue* pq, char* action, int target);
 /*
  *dequeue top node in list and return (with next set to NULL)
  */
-struct ListNode* dequeueCurrentTask(struct PlayerQueue* pq);
+struct Action* dequeueCurrentTask(struct PlayerQueue* pq);
 
 /*
  * return the list as a string which can be sent to client
