@@ -1,105 +1,203 @@
 #include "gameStructures.h"
 
-//creates PlayerQueue
-struct PlayerQueue* createPlayerQueue(){
-    struct PlayerQueue *pq = (struct PlayerQueue*) malloc(sizeof(struct PlayerQueue));
+// creates PlayerQueue
+struct PlayerQueue *createPlayerQueue()
+{
+    struct PlayerQueue *pq = (struct PlayerQueue *)malloc(sizeof(struct PlayerQueue));
     pq->head = NULL;
     pq->tail = NULL;
     pq->size = 0;
 }
 
-//creates taskNode (used in enqueueNewTask, do not use elsewhere)
-struct ListNode* createNode(char* action, int target) {
-    struct ListNode *ls = (struct ListNode*) malloc(sizeof(struct ListNode));
-    ls->action = action;
-    ls->target = target;
-    ls->next = NULL;
-    return ls;
+// creates taskNode (used in enqueueNewTask, do not use elsewhere)
+struct Action *createNode(char *action, int target)
+{
+    struct Action *act = (struct ListNode *)malloc(sizeof(struct Action));
+    act->action = action;
+    act->target = target;
+    act->next = NULL;
+    return act;
 }
 
-//adds new task to end of player queue
-void enqueueNewTask (struct PlayerQueue* pq, char* action, int target){
-    if(pq == NULL){
+// adds new task to end of player queue
+void enqueueNewTask(struct PlayerQueue *pq, char *action, int target)
+{
+    if (pq == NULL)
+    {
         perror("PlayerQueue cannot be NULL");
         return;
     }
-    
-    struct ListNode* ln = CreateNode(action, target);
-    if(pq->head == NULL && pq->tail == NULL){
-        pq->head = ln;
+
+    struct Action *act = CreateNode(action, target);
+    if (pq->head == NULL && pq->tail == NULL)
+    {
+        pq->head = act;
         pq->tail = pq->head;
     }
-    else{
-        pq->tail->next = ln;
-        pq->tail = ln;
+    else
+    {
+        pq->tail->next = act;
+        pq->tail = act;
     }
     pq->size++;
 }
 
-//removes task from front of player queue
-struct ListNode* dequeueCurrentTask(struct PlayerQueue* pq){
-    if(pq == NULL){
+// removes task from front of player queue
+struct Action *dequeueCurrentTask(struct PlayerQueue *pq)
+{
+    if (pq == NULL)
+    {
         perror("PlayerQueue cannot be NULL");
         return;
     }
 
-    struct ListNode* currLN = pq->head;
+    struct Action *currAction = pq->head;
 
-    if(pq->head != pq->tail){
+    if (pq->head != pq->tail)
+    {
         pq->head = pq->head->next;
-        currLN->next = NULL;
-        return currLN;
+        currAction->next = NULL;
+        return currAction;
     }
-    else{
+    else
+    {
         pq->head = NULL;
         pq->tail = pq->head;
-        return currLN;
+        return currAction;
     }
 }
 
-//todo
-char* getListAsString(struct PlayerQueue* pq){
+// todo
+char *getListAsString(struct PlayerQueue *pq)
+{
     return NULL;
 }
 
-void deletePlayerQueue(struct PlayerQueue* pq){
-    struct ListNode *tmp = NULL, *ln = pq->head;
-    while(ln != NULL){
-        tmp = ln;
-        ln = ln->next;
+void deletePlayerQueue(struct PlayerQueue *pq)
+{
+    struct Action *tmp = NULL, *act = pq->head;
+    while (act != NULL)
+    {
+        tmp = act;
+        act = act->next;
         free(tmp);
     }
     free(pq);
 }
 
-struct Player* createPlayer(char* name){
-    struct Player* p = (struct Player*) malloc(sizeof(struct Player));
-    strcpy(p->name, name);
+struct Player *createPlayer(int num)
+{
+    struct Player *p = (struct Player *)malloc(sizeof(struct Player));
+    p->num = num;
     p->gun = DEFAULT_GUN;
     p->health = DEFAULT_HEALTH;
     p->queue = createPlayerQueue();
+    p->isBoostActive = false;
+    p->boostCount = 0;
 }
 
-void deletePlayer(struct Player* p){
+void deletePlayer(struct Player *p)
+{
     deletePlayerQueue(p->queue);
     free(p);
 }
 
-struct Game* initGamestate() {
-    struct Game* gameState = (struct Game*) malloc(sizeof(struct Game));
+struct Game *initGamestate()
+{
+    struct Game *gameState = (struct Game *)malloc(sizeof(struct Game));
     gameState->gameover = false;
     gameState->gunlocked = false;
-    for(int i = 0; i < NUM_OF_PLAYERS; i++){
-        gameState->players[i] = initPlayer();
+    for (int i = 0; i < NUM_OF_PLAYERS; i++)
+    {
+        gameState->players[i] = createPlayer(i + 1);
     }
     return gameState;
 }
 
-void endGamestate(struct Game* g){
-    for(int i = 0; i < NUM_OF_PLAYERS; i++){
+void endGamestate(struct Game *g)
+{
+    for (int i = 0; i < NUM_OF_PLAYERS; i++)
+    {
         deletePlayer(g->players[i]);
     }
     free(g);
+}
+
+void addActionToPlayer(struct Game *g, int playerNum, char *action, int target)
+{
+    if (playerNum - 1 < NUM_OF_PLAYERS)
+    {
+        enqueueNewTask(g->players[playerNum - 1], action, target);
+    }
+}
+
+// If a player's next command is "gun boost" while another player is using the gun boost. That command is being ignored.
+struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum)
+{
+    if (playerNum - 1 < NUM_OF_PLAYERS)
+    {
+        for (int i = 0; i < NUM_OF_PLAYERS; i++)
+        {
+            if (g->players[i]->isBoostActive == true)
+            {
+                printf("Gun boost is unavailable!\nAnother player is using it.\nAdding the next command!");
+                dequeueCurrentTask(g->players[playerNum - 1]->queue->head);
+                getCurrentActionForPlayer(g, playerNum);
+            }
+            else
+            {
+                struct Action *a = (struct Action *)malloc(sizeof(struct Action));
+                struct Action *act = dequeueCurrentTask(g->players[playerNum - 1]->queue->head);
+                free(act);
+                a->action = act->action;
+                a->target = act->target;
+                return a;
+            }
+        }
+    }
+    return NULL;
+}
+
+/* Applies the task and updates the queue of the player
+   Attacks do 10 damage
+   Boosted attacks do 20 damage
+*/
+
+void applyTask(struct Game *g, struct Player *p, struct Action *a)
+{
+    if (a->action == "attack")
+    {
+        if (p->isBoostActive)
+        {
+            g->players[a->target]->health -= 20;
+            p->boostCount--;
+            if (p->boostCount == 0)
+            {
+                p->isBoostActive = false;
+            }
+        }
+        else
+        {
+            g->players[a->target]->health -= 10;
+        }
+        if (g->players[a->target]->health == 0)
+        {
+            deletePlayer(g->players[a->target]);
+        }
+    }
+    else if (a->action == "defense")
+    {
+        p->health += 10;
+    }
+    else if (a->action == "boost")
+    {
+        p->gun++;
+        if (p->gun == MAX_GUN_FILL)
+        {
+            p->isBoostActive = true;
+            p->boostCount = BOOST_COUNT_START;
+        }
+    }
 }
 
 /*
@@ -133,21 +231,3 @@ int getRecieveSocketForPlayer(struct Game* g, int playerNum){
     return g->players[playerNum]->recieveSocket;
 }
 */
-
-void addActionToPlayer(struct Game* g, int playerNum, char* action, int target){
-    if(playerNum-1 < NUM_OF_PLAYERS){
-        enqueueNewTask(g->players[playerNum-1], action, target);
-    }
-}
-
-struct Action* getCurrentActionForPlayer(struct Game* g, int playerNum){
-    if(playerNum-1 < NUM_OF_PLAYERS){
-        struct Action* a = (struct Action*) malloc(sizeof(struct Action));
-        struct ListNode* ln = dequeueCurrentTask(g->players[playerNum-1]);
-        free(ln);
-        a->action = ln->action;
-        a->target = ln->target;
-        return a;
-    }
-    return NULL;
-}
