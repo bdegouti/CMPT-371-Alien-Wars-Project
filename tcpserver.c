@@ -18,6 +18,23 @@
 #define BUFFER_SIZE 8192
 #define TURN_LENGTH 5
 
+typedef enum api {
+    client_connect_request = 1001001000,
+    server_connect_response = 0001001000,
+    client_player_action = 1001001001,
+    server_broadcast_gamestate = 0111111111,
+    server_gameover = 0000000000,
+
+    p1 = 0001,
+    p2 = 0010,
+    p3 = 0011,
+    p4 = 0100,
+
+    attack = 0101,
+    defence = 0110,
+    gun = 0111
+} api;
+
 struct argsToThread {
     struct Game* g;
     struct pollfd* socks;
@@ -69,6 +86,12 @@ void deleteSocketInPoll(struct pollfd pfds[], int i, int *fd_count){
     (*fd_count)--;
 }
 
+void moveStrToHeap(char** str){
+    char* tmp = *str;
+    *str = malloc(sizeof(strlen(tmp)));
+    strcpy(*str, tmp);
+}
+
 //sends data to users every "round"
 void sendDataToPlayers(struct argsToThread* att){
     struct Game* g = att->g;
@@ -84,6 +107,69 @@ void sendDataToPlayers(struct argsToThread* att){
         }
     }
 
+}
+
+char* getActionFromAPI(char* action){
+    int actionInt = atoi(action);
+    if(actionInt == 0101){
+        return "attack";
+    }
+    else if(actionInt == 0110){
+        return "defence";
+    }
+    else if(actionInt == 0111){
+        return "gun";
+    }
+    else{
+        return "unknown";
+    }
+}
+
+int getTargetFromAPI(char* target){
+    int targetInt = atoi(target);
+    if(target == 0001){
+        return 0;
+    }
+    else if(target == 0010){
+        return 1;
+    }
+    else if(target == 0011){
+        return 2;
+    }
+    else if(target == 0111){
+        return 3;
+    }
+    else{
+        return -1;
+    }
+}
+
+void interpretPlayerMessage(struct Game* g, int player, char* msg){
+    char* msgType = (char*) malloc(10);
+    strncpy(msgType, msg, 10);
+
+
+    if(atoi(msgType) == client_connect_request){
+        char* targetStr = (char*) malloc(4);
+        char* actionStr = (char*) malloc(4);
+
+        //todo: check that these are valid inputs!
+        strncpy(targetStr, msg+10, 4);
+        strncpy(actionStr, msg+14, 4);
+
+        int target = getTargetFromAPI(targetStr);
+        char* action = getActionFromAPI(actionStr);
+        moveStrToHeap(action);
+        
+        addActionToPlayer(g, player, action, target);
+
+        free(targetStr);
+        free(actionStr);
+    }
+    else{
+        perror("ERROR: request not understood!");
+    }
+    free(msgType);
 }
 
 
@@ -165,8 +251,10 @@ int main() {
                     close(serverSockets[i].fd);
                     deleteSocketInPoll(serverSockets, i, &currServerConnections);
                 }
-                //Todo: Here's where we need to use the function that actually interprets data!
+
+                interpretPlayerMessage(game, i, buffer);
             }
         }
     }
+    free(serverSockets);
 }
