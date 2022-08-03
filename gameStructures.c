@@ -12,7 +12,7 @@ struct PlayerQueue *createPlayerQueue()
 // creates taskNode (used in enqueueNewTask, do not use elsewhere)
 struct Action *createNode(char *action, int target)
 {
-    struct Action *act = (struct ListNode *)malloc(sizeof(struct Action));
+    struct Action *act = (struct Action*)malloc(sizeof(struct Action));
     act->action = action;
     act->target = target;
     act->next = NULL;
@@ -28,7 +28,7 @@ void enqueueNewTask(struct PlayerQueue *pq, char *action, int target)
         return;
     }
 
-    struct Action *act = CreateNode(action, target);
+    struct Action *act = createNode(action, target);
     if (pq->head == NULL && pq->tail == NULL)
     {
         pq->head = act;
@@ -48,7 +48,7 @@ struct Action *dequeueCurrentTask(struct PlayerQueue *pq)
     if (pq == NULL)
     {
         perror("PlayerQueue cannot be NULL");
-        return;
+        return NULL;
     }
 
     struct Action *currAction = pq->head;
@@ -79,7 +79,7 @@ void deletePlayerQueue(struct PlayerQueue *pq)
     while (act != NULL)
     {
         tmp = act;
-        free(act->target);
+        free(act->action);
         act = act->next;
         free(tmp);
     }
@@ -103,7 +103,7 @@ void deletePlayer(struct Player *p)
     free(p);
 }
 
-struct Game *initGamestate()
+struct Game *initGameState()
 {
     struct Game *gameState = (struct Game *)malloc(sizeof(struct Game));
     gameState->gameover = false;
@@ -126,30 +126,30 @@ void endGamestate(struct Game *g)
 
 void addActionToPlayer(struct Game *g, int playerNum, char *action, int target)
 {
-    if (playerNum - 1 < NUM_OF_PLAYERS)
+    if (playerNum < NUM_OF_PLAYERS)
     {
-        enqueueNewTask(g->players[playerNum - 1], action, target);
+        enqueueNewTask(g->players[playerNum]->queue, action, target);
     }
 }
 
 // If a player's next command is "gun boost" while another player is using the gun boost. That command is being ignored.
 struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum)
 {
-    if (playerNum - 1 < NUM_OF_PLAYERS)
+    if (playerNum < NUM_OF_PLAYERS)
     {
         for (int i = 0; i < NUM_OF_PLAYERS; i++)
         {
             if (g->players[i]->isBoostActive == true)
             {
                 printf("Gun boost is unavailable!\nAnother player is using it.\nAdding the next command!");
-                dequeueCurrentTask(g->players[playerNum - 1]->queue->head);
+                dequeueCurrentTask(g->players[playerNum]->queue);
                 getCurrentActionForPlayer(g, playerNum);
             }
             else
             {
                 struct Action *a = (struct Action *)malloc(sizeof(struct Action));
-                struct Action *act = dequeueCurrentTask(g->players[playerNum - 1]->queue->head);
-                free(act->target);
+                struct Action *act = dequeueCurrentTask(g->players[playerNum]->queue);
+                free(act->action);
                 free(act);
                 a->action = act->action;
                 a->target = act->target;
@@ -201,35 +201,3 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a)
         }
     }
 }
-
-/*
-void setSendSocketForPlayer(struct Game* g, int playerNum, int fd){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return;
-    }
-    g->players[playerNum]->sendSocket = fd;
-}
-int getSendSocketForPlayer(struct Game* g, int playerNum){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return -1;
-    }
-    return g->players[playerNum]->sendSocket;
-}
-
-void setRecieveSocketForPlayer(struct Game* g, int playerNum, int fd){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return;
-    }
-    g->players[playerNum]->recieveSocket = fd;
-}
-int getRecieveSocketForPlayer(struct Game* g, int playerNum){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return -1;
-    }
-    return g->players[playerNum]->recieveSocket;
-}
-*/

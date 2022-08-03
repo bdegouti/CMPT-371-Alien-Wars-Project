@@ -1,6 +1,8 @@
+//gcc -pthread -o tcpserver tcpserver.c gameStructures.c to compile
 #include <stdio.h>
 #include <errno.h> // Errors 
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
 #include <poll.h>
@@ -13,12 +15,11 @@
 #include <netdb.h> // getaddrinfo, gai_strerror
 
 #define BACKLOG 6
-#define FLAGS 0
-#define SERVER_PORT "6969"
-#define BUFFER_SIZE 8192
-#define TURN_LENGTH 5
+#define SERVER_PORT "6969" //Server port number
+#define BUFFER_SIZE 8192 //size of buffer (subject to change)
+#define TURN_LENGTH 5 //length of turn (secs)
 
-// ------- api -------
+// ------- temp api -------
 const char client_connect_request[] = "1001001000";
 const char server_connect_response[] = "0001001000";
 const char client_player_action[] = "1001001001";
@@ -33,8 +34,9 @@ const char p4[] = "0100";
 const char p_attack[] = "0101";
 const char p_defence[] = "0110";
 const char p_gun[] = "0111";
-// ------- api -------
+// ------- temp api -------
 
+//for sending mulltiple args through pthread_create
 struct argsToThread {
     struct Game* g;
     struct pollfd* socks;
@@ -93,7 +95,8 @@ void moveStrToHeap(char** str){
 }
 
 //sends data to users every "round"
-void sendDataToPlayers(struct argsToThread* att){
+void* sendDataToPlayers(void* data){
+    struct argsToThread* att = (struct argsToThread*) data;
     struct Game* g = att->g;
     struct pollfd* socks = att->socks;
     while(true){
@@ -103,27 +106,29 @@ void sendDataToPlayers(struct argsToThread* att){
 
         char* gameState = ""; //Todo: getListAsString(g);
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            send(socks[i].fd, gameState, sizeof(gameState), NULL);
+            send(socks[i].fd, gameState, sizeof(gameState), 0);
         }
     }
 
 }
 
+//get action via API tranlsation
 char* getActionFromAPI(char* action){
     if(strcmp(action, p_attack) == 0){
-        return "attack";
+        return "att";
     }
     else if(strcmp(action, p_defence) == 0){
-        return "defence";
+        return "def";
     }
     else if(strcmp(action, p_gun) == 0){
         return "gun";
     }
     else{
-        return "unknown";
+        return "ukn";
     }
 }
 
+//get Target via API translation
 int getTargetFromAPI(char* target){
     if(strcmp(target, p1) == 0){
         return 0;
@@ -142,12 +147,13 @@ int getTargetFromAPI(char* target){
     }
 }
 
+//retrieve information from player transmission
 void interpretPlayerMessage(struct Game* g, int player, char* msg){
     char* msgType = (char*) malloc(10);
     strncpy(msgType, msg, 10);
 
 
-    if(atoi(msgType) == client_connect_request){
+    if(strcmp(msgType, client_connect_request) == 0){
         char* targetStr = (char*) malloc(4);
         char* actionStr = (char*) malloc(4);
 
@@ -158,7 +164,7 @@ void interpretPlayerMessage(struct Game* g, int player, char* msg){
         int target = getTargetFromAPI(targetStr);
         char* action = getActionFromAPI(actionStr);
         
-        moveStrToHeap(action);
+        moveStrToHeap(&action);
         
         addActionToPlayer(g, player, action, target);
 

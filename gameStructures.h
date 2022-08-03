@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdbool.h> 
 
 #define NUM_OF_PLAYERS 4
@@ -17,7 +18,6 @@ struct PlayerQueue {
 
 struct Player {
     int num;
-    //int sendSocket, recieveSocket;
     struct PlayerQueue* queue;
     int health;
     int gun;
@@ -42,9 +42,7 @@ struct Action {
 * initialize with NULL values.
 * return pointer to list.
 */
-struct PlayerQueue* createPlayerQueue(){
-
-}
+struct PlayerQueue *createPlayerQueue();
 /*
  * Allocate memory for a node of type struct ListNode and
  * initialize it with the item value.
@@ -91,12 +89,6 @@ struct Game* initGameState();
  *ends game and frees used memory in self and all substructures
  */
 void endGameState(struct Game* g);
-
-void setSendSocketForPlayer(struct Game* g, int playerNum, int fd);
-int getSendSocketForPlayer(struct Game* g, int playerNum);
-
-void setRecieveSocketForPlayer(struct Game* g, int playerNum, int fd);
-int getRecieveSocketForPlayer(struct Game* g, int playerNum);
 
 /*
  * adds action to the player at the given index
