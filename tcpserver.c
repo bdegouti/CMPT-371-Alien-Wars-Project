@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <errno.h> // Errors 
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
 #include <poll.h>
@@ -93,7 +94,8 @@ void moveStrToHeap(char** str){
 }
 
 //sends data to users every "round"
-void sendDataToPlayers(struct argsToThread* att){
+void* sendDataToPlayers(void* data){
+    struct argsToThread* att = (struct argsToThread*) data;
     struct Game* g = att->g;
     struct pollfd* socks = att->socks;
     while(true){
@@ -103,7 +105,7 @@ void sendDataToPlayers(struct argsToThread* att){
 
         char* gameState = ""; //Todo: getListAsString(g);
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            send(socks[i].fd, gameState, sizeof(gameState), NULL);
+            send(socks[i].fd, gameState, sizeof(gameState), 0);
         }
     }
 
@@ -111,16 +113,16 @@ void sendDataToPlayers(struct argsToThread* att){
 
 char* getActionFromAPI(char* action){
     if(strcmp(action, p_attack) == 0){
-        return "attack";
+        return "att";
     }
     else if(strcmp(action, p_defence) == 0){
-        return "defence";
+        return "def";
     }
     else if(strcmp(action, p_gun) == 0){
         return "gun";
     }
     else{
-        return "unknown";
+        return "ukn";
     }
 }
 
@@ -147,7 +149,7 @@ void interpretPlayerMessage(struct Game* g, int player, char* msg){
     strncpy(msgType, msg, 10);
 
 
-    if(atoi(msgType) == client_connect_request){
+    if(strcmp(msgType, client_connect_request) == 0){
         char* targetStr = (char*) malloc(4);
         char* actionStr = (char*) malloc(4);
 
@@ -158,7 +160,7 @@ void interpretPlayerMessage(struct Game* g, int player, char* msg){
         int target = getTargetFromAPI(targetStr);
         char* action = getActionFromAPI(actionStr);
         
-        moveStrToHeap(action);
+        moveStrToHeap(&action);
         
         addActionToPlayer(g, player, action, target);
 

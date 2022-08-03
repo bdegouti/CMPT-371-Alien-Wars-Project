@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdbool.h> 
 
 #define NUM_OF_PLAYERS 4
@@ -41,9 +42,7 @@ struct Action {
 * initialize with NULL values.
 * return pointer to list.
 */
-struct PlayerQueue* createPlayerQueue(){
-
-}
+struct PlayerQueue *createPlayerQueue();
 /*
  * Allocate memory for a node of type struct ListNode and
  * initialize it with the item value.
