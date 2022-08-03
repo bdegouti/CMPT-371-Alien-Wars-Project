@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <poll.h>
+#include <pthread.h>
 #include "gameStructures.h"
 
 
@@ -15,6 +16,13 @@
 #define FLAGS 0
 #define SERVER_PORT "6969"
 #define BUFFER_SIZE 8192
+#define TURN_LENGTH 5
+
+struct argsToThread {
+    struct Game* g;
+    struct pollfd* socks;
+    int* currConnections;
+};
 
 void exit_if_error(int status, char* error_message) {
     if (status == -1) {
@@ -60,6 +68,24 @@ void addSocketInPoll(struct pollfd *fds[], int newfd, int *fd_count){
 void deleteSocketInPoll(struct pollfd pfds[], int i, int *fd_count){
     pfds[i] = pfds[*fd_count-1];
     (*fd_count)--;
+}
+
+//sends data to users every "round"
+void sendDataToPlayers(struct argsToThread* att){
+    struct Game* g = att->g;
+    struct pollfd* socks = att->socks;
+    int* currConnections = att->currConnections;
+    while(true){
+        sleep(TURN_LENGTH);
+        
+        //Todo: perform player actions for round
+
+        char* gameState = ""; //Todo: getListAsString(g);
+        for(int i = 0; i < *currConnections; i++){
+            send(socks[i].fd, gameState, sizeof(gameState), NULL);
+        }
+    }
+
 }
 
 
@@ -113,7 +139,13 @@ int main() {
         }
     }
 
-    //Todo: make a process here that sends the data to clients every x seconds.
+    //creates thread that will update gamestate and send data to players every x seconds
+    pthread_t* roundLoop;
+    struct argsToThread att;
+    att.currConnections = currServerConnections;
+    att.g = game;
+    att.socks = serverSockets;
+    pthread_create(roundLoop, NULL, sendDataToPlayers, &att);
 
     //use poll to scan for events on any of the connections. Enter recieved data into game.
     while(true) {
