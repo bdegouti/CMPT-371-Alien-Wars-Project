@@ -18,22 +18,22 @@
 #define BUFFER_SIZE 8192
 #define TURN_LENGTH 5
 
-typedef enum api {
-    client_connect_request = 1001001000,
-    server_connect_response = 0001001000,
-    client_player_action = 1001001001,
-    server_broadcast_gamestate = 0111111111,
-    server_gameover = 0000000000,
+// ------- api -------
+const char client_connect_request[] = "1001001000";
+const char server_connect_response[] = "0001001000";
+const char client_player_action[] = "1001001001";
+const char server_broadcast_gamestate[] = "0111111111";
+const char server_gameover[] = "0000000000";
 
-    p1 = 0001,
-    p2 = 0010,
-    p3 = 0011,
-    p4 = 0100,
+const char p1[] = "0001";
+const char p2[] = "0010";
+const char p3[] = "0011";
+const char p4[] = "0100";
 
-    attack = 0101,
-    defence = 0110,
-    gun = 0111
-} api;
+const char p_attack[] = "0101";
+const char p_defence[] = "0110";
+const char p_gun[] = "0111";
+// ------- api -------
 
 struct argsToThread {
     struct Game* g;
@@ -110,14 +110,13 @@ void sendDataToPlayers(struct argsToThread* att){
 }
 
 char* getActionFromAPI(char* action){
-    int actionInt = atoi(action);
-    if(actionInt == 0101){
+    if(strcmp(action, p_attack) == 0){
         return "attack";
     }
-    else if(actionInt == 0110){
+    else if(strcmp(action, p_defence) == 0){
         return "defence";
     }
-    else if(actionInt == 0111){
+    else if(strcmp(action, p_gun) == 0){
         return "gun";
     }
     else{
@@ -126,17 +125,16 @@ char* getActionFromAPI(char* action){
 }
 
 int getTargetFromAPI(char* target){
-    int targetInt = atoi(target);
-    if(target == 0001){
+    if(strcmp(target, p1) == 0){
         return 0;
     }
-    else if(target == 0010){
+    else if(strcmp(target, p2) == 0){
         return 1;
     }
-    else if(target == 0011){
+    else if(strcmp(target, p3) == 0){
         return 2;
     }
-    else if(target == 0111){
+    else if(strcmp(target, p4) == 0){
         return 3;
     }
     else{
@@ -159,6 +157,7 @@ void interpretPlayerMessage(struct Game* g, int player, char* msg){
 
         int target = getTargetFromAPI(targetStr);
         char* action = getActionFromAPI(actionStr);
+        
         moveStrToHeap(action);
         
         addActionToPlayer(g, player, action, target);
