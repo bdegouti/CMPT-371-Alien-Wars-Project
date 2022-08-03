@@ -21,7 +21,6 @@
 struct argsToThread {
     struct Game* g;
     struct pollfd* socks;
-    int* currConnections;
 };
 
 void exit_if_error(int status, char* error_message) {
@@ -74,14 +73,13 @@ void deleteSocketInPoll(struct pollfd pfds[], int i, int *fd_count){
 void sendDataToPlayers(struct argsToThread* att){
     struct Game* g = att->g;
     struct pollfd* socks = att->socks;
-    int* currConnections = att->currConnections;
     while(true){
         sleep(TURN_LENGTH);
         
         //Todo: perform player actions for round
 
         char* gameState = ""; //Todo: getListAsString(g);
-        for(int i = 0; i < *currConnections; i++){
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
             send(socks[i].fd, gameState, sizeof(gameState), NULL);
         }
     }
@@ -134,7 +132,7 @@ int main() {
             perror("ERROR: failed to accept connection");
         }
         else{
-            addSocketInPoll(&serverSockets, newSocket, currServerConnections);
+            addSocketInPoll(&serverSockets, newSocket, &currServerConnections);
             //Todo: create function to send a message to the client who just joined ("hello player x!")
         }
     }
@@ -142,7 +140,6 @@ int main() {
     //creates thread that will update gamestate and send data to players every x seconds
     pthread_t* roundLoop;
     struct argsToThread att;
-    att.currConnections = currServerConnections;
     att.g = game;
     att.socks = serverSockets;
     pthread_create(roundLoop, NULL, sendDataToPlayers, &att);
