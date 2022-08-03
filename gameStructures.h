@@ -17,7 +17,6 @@ struct PlayerQueue {
 
 struct Player {
     int num;
-    //int sendSocket, recieveSocket;
     struct PlayerQueue* queue;
     int health;
     int gun;
@@ -91,12 +90,6 @@ struct Game* initGameState();
  *ends game and frees used memory in self and all substructures
  */
 void endGameState(struct Game* g);
-
-void setSendSocketForPlayer(struct Game* g, int playerNum, int fd);
-int getSendSocketForPlayer(struct Game* g, int playerNum);
-
-void setRecieveSocketForPlayer(struct Game* g, int playerNum, int fd);
-int getRecieveSocketForPlayer(struct Game* g, int playerNum);
 
 /*
  * adds action to the player at the given index
