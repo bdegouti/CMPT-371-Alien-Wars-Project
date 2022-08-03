@@ -79,6 +79,7 @@ void deletePlayerQueue(struct PlayerQueue *pq)
     while (act != NULL)
     {
         tmp = act;
+        free(act->target);
         act = act->next;
         free(tmp);
     }
@@ -148,6 +149,7 @@ struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum)
             {
                 struct Action *a = (struct Action *)malloc(sizeof(struct Action));
                 struct Action *act = dequeueCurrentTask(g->players[playerNum - 1]->queue->head);
+                free(act->target);
                 free(act);
                 a->action = act->action;
                 a->target = act->target;
