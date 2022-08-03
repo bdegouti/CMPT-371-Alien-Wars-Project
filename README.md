@@ -1,5 +1,14 @@
 # CMPT-371-Alien-Wars-Project  
 
+## Development Notes 
+- Be sure to pull the repo before you make changes. Try to prevent merge conflicts as much as possible. 
+- compile in linux using gcc. 
+- Delete your output files! 
+- Use Camel Case 
+- Avoid using typedef unless impossible otherwise. 
+- 4 spaces, come on guys. 
+
+
 ## Client Overview
 CLIENT Connect to Server Function   
 
