@@ -201,35 +201,3 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a)
         }
     }
 }
-
-/*
-void setSendSocketForPlayer(struct Game* g, int playerNum, int fd){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return;
-    }
-    g->players[playerNum]->sendSocket = fd;
-}
-int getSendSocketForPlayer(struct Game* g, int playerNum){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return -1;
-    }
-    return g->players[playerNum]->sendSocket;
-}
-
-void setRecieveSocketForPlayer(struct Game* g, int playerNum, int fd){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return;
-    }
-    g->players[playerNum]->recieveSocket = fd;
-}
-int getRecieveSocketForPlayer(struct Game* g, int playerNum){
-    if(playerNum > NUM_OF_PLAYERS){
-        perror("index error: playerNum exceeds number of players");
-        return -1;
-    }
-    return g->players[playerNum]->recieveSocket;
-}
-*/
