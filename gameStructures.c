@@ -126,29 +126,29 @@ void endGamestate(struct Game *g)
 
 void addActionToPlayer(struct Game *g, int playerNum, char *action, int target)
 {
-    if (playerNum - 1 < NUM_OF_PLAYERS)
+    if (playerNum < NUM_OF_PLAYERS)
     {
-        enqueueNewTask(g->players[playerNum - 1]->queue, action, target);
+        enqueueNewTask(g->players[playerNum]->queue, action, target);
     }
 }
 
 // If a player's next command is "gun boost" while another player is using the gun boost. That command is being ignored.
 struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum)
 {
-    if (playerNum - 1 < NUM_OF_PLAYERS)
+    if (playerNum < NUM_OF_PLAYERS)
     {
         for (int i = 0; i < NUM_OF_PLAYERS; i++)
         {
             if (g->players[i]->isBoostActive == true)
             {
                 printf("Gun boost is unavailable!\nAnother player is using it.\nAdding the next command!");
-                dequeueCurrentTask(g->players[playerNum - 1]->queue);
+                dequeueCurrentTask(g->players[playerNum]->queue);
                 getCurrentActionForPlayer(g, playerNum);
             }
             else
             {
                 struct Action *a = (struct Action *)malloc(sizeof(struct Action));
-                struct Action *act = dequeueCurrentTask(g->players[playerNum - 1]->queue);
+                struct Action *act = dequeueCurrentTask(g->players[playerNum]->queue);
                 free(act->action);
                 free(act);
                 a->action = act->action;
