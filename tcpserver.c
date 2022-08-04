@@ -19,22 +19,7 @@
 #define BUFFER_SIZE 8192 //size of buffer (subject to change)
 #define TURN_LENGTH 5 //length of turn (secs)
 
-// ------- temp api -------
-const char client_connect_request[] = "1001001000";
-const char server_connect_response[] = "0001001000";
-const char client_player_action[] = "1001001001";
-const char server_broadcast_gamestate[] = "0111111111";
-const char server_gameover[] = "0000000000";
-
-const char p1[] = "0001";
-const char p2[] = "0010";
-const char p3[] = "0011";
-const char p4[] = "0100";
-
-const char p_attack[] = "0101";
-const char p_defence[] = "0110";
-const char p_gun[] = "0111";
-// ------- temp api -------
+pthread_mutex_t canAccessGameData;
 
 //for sending mulltiple args through pthread_create
 struct argsToThread {
@@ -96,31 +81,40 @@ void moveStrToHeap(char** str){
 
 //sends data to users every "round"
 void* sendDataToPlayers(void* data){
+    //data be an argsToThread struct*
     struct argsToThread* att = (struct argsToThread*) data;
     struct Game* g = att->g;
+
+    //socks is a shared element, but should be threadsafe (relevant data is not changed)
     struct pollfd* socks = att->socks;
     while(true){
         sleep(TURN_LENGTH);
+        pthread_mutex_lock(&canAccessGameData);
         
         //Todo: perform player actions for round
+
+        if(g->gameover){
+            //Todo: send game end data and exit 
+        }
 
         char* gameState = ""; //Todo: getListAsString(g);
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
             send(socks[i].fd, gameState, sizeof(gameState), 0);
         }
+        pthread_mutex_unlock(&canAccessGameData);
     }
 
 }
 
-//get action via API tranlsation
+//get action via API tranlsation (DON'T REALLY NEED THIS, BUT NOT GOING TO DELETE JUST YET)
 char* getActionFromAPI(char* action){
-    if(strcmp(action, p_attack) == 0){
-        return "att";
+    if(strcmp(action, "att") == 0){
+        return "attack";
     }
-    else if(strcmp(action, p_defence) == 0){
-        return "def";
+    else if(strcmp(action, "def") == 0){
+        return "defence";
     }
-    else if(strcmp(action, p_gun) == 0){
+    else if(strcmp(action, "gun") == 0){
         return "gun";
     }
     else{
@@ -130,16 +124,16 @@ char* getActionFromAPI(char* action){
 
 //get Target via API translation
 int getTargetFromAPI(char* target){
-    if(strcmp(target, p1) == 0){
+    if(strcmp(target, "p1") == 0){
         return 0;
     }
-    else if(strcmp(target, p2) == 0){
+    else if(strcmp(target, "p2") == 0){
         return 1;
     }
-    else if(strcmp(target, p3) == 0){
+    else if(strcmp(target, "p3") == 0){
         return 2;
     }
-    else if(strcmp(target, p4) == 0){
+    else if(strcmp(target, "p4") == 0){
         return 3;
     }
     else{
@@ -149,37 +143,13 @@ int getTargetFromAPI(char* target){
 
 //retrieve information from player transmission
 void interpretPlayerMessage(struct Game* g, int player, char* msg){
-    char* msgType = (char*) malloc(10);
-    strncpy(msgType, msg, 10);
-
-
-    if(strcmp(msgType, client_connect_request) == 0){
-        char* targetStr = (char*) malloc(4);
-        char* actionStr = (char*) malloc(4);
-
-        //todo: check that these are valid inputs!
-        strncpy(targetStr, msg+10, 4);
-        strncpy(actionStr, msg+14, 4);
-
-        int target = getTargetFromAPI(targetStr);
-        char* action = getActionFromAPI(actionStr);
-        
-        moveStrToHeap(&action);
-        
-        addActionToPlayer(g, player, action, target);
-
-        free(targetStr);
-        free(actionStr);
-    }
-    else{
-        perror("ERROR: request not understood!");
-    }
-    free(msgType);
+    //todo
 }
 
 
 int main() {
 
+    pthread_mutex_init(&canAccessGameData, NULL);
     // server_addr_list 
     struct addrinfo * server_addr_list = init_server_addr_list();
 
@@ -214,6 +184,8 @@ int main() {
     //initialize Game
     int bytesSent;
     struct Game* game = initGameState();
+    bool playerIsReady[4] = {false};
+    bool gameStarted = false;
 
     //accept connections to 4 clients before proceeding into game loop
     while(currServerConnections != NUM_OF_PLAYERS) {
@@ -224,16 +196,14 @@ int main() {
         }
         else{
             addSocketInPoll(&serverSockets, newSocket, &currServerConnections);
-            //Todo: create function to send a message to the client who just joined ("hello player x!")
+            char startMsg[20];
+            sprintf(startMsg, "Ready Player %d? (enter any key to begin)", currServerConnections);
+            send(newSocket, startMsg, strlen(startMsg), 0);
         }
     }
-
-    //creates thread that will update gamestate and send data to players every x seconds
+    
+    //declare thread var
     pthread_t* roundLoop;
-    struct argsToThread att;
-    att.g = game;
-    att.socks = serverSockets;
-    pthread_create(roundLoop, NULL, sendDataToPlayers, &att);
 
     //use poll to scan for events on any of the connections. Enter recieved data into game.
     while(true) {
@@ -244,22 +214,46 @@ int main() {
         }
         for(int i = 0; i < currServerConnections; i++){
             if(serverSockets[i].revents & POLLIN){
-                int inputBytes = recv(serverSockets[i].fd, buffer, sizeof(buffer), 0);
-                int sender_sock = serverSockets[i].fd;
-                if(inputBytes <= 0){
-                    perror("ERROR: failed at recv in poll loop");
-                    close(serverSockets[i].fd);
-                    deleteSocketInPoll(serverSockets, i, &currServerConnections);
+                if(gameStarted){
+                    int inputBytes = recv(serverSockets[i].fd, buffer, sizeof(buffer), 0);
+                    int sender_sock = serverSockets[i].fd;
+                    if(inputBytes <= 0){
+                        perror("ERROR: failed at recv in poll loop");
+                        //todo: send exit message to clients
+                        return -1;
+                    }
+                    pthread_mutex_lock(&canAccessGameData);
+                    interpretPlayerMessage(game, i, buffer);
+                    pthread_mutex_unlock(&canAccessGameData);
                 }
-                else if(inputBytes == 0){
-                    printf("Connection to socket %d closed", serverSockets[i].fd);
-                    close(serverSockets[i].fd);
-                    deleteSocketInPoll(serverSockets, i, &currServerConnections);
+                else{
+                    playerIsReady[i] = true;
+                    if(playerIsReady[0] && playerIsReady[1] && playerIsReady[2] && playerIsReady[3]){
+                        gameStarted = true; 
+                        //creates thread that will update gamestate and send data to players every x seconds
+                        //Todo: use mutex or semaphore to synchonize thread access to game struct, otherwise might be competing access.
+                        struct argsToThread att;
+                        att.g = game;
+                        att.socks = serverSockets;
+                        if(pthread_create(roundLoop, NULL, sendDataToPlayers, &att)){
+                            perror("ERROR: failed at pthread_create");
+                            exit(0);
+                        }
+                    }
                 }
-
-                interpretPlayerMessage(game, i, buffer);
             }
         }
     }
+
+    //close all sockets
+    for(int i = 0; i < currServerConnections; i++){
+        close(serverSockets[i].fd);
+        deleteSocketInPoll(serverSockets, i, &currServerConnections);
+    }
+    
+    //close thread
+    pthread_exit(roundLoop);
+    
+    //free struct pollfd*
     free(serverSockets);
 }
