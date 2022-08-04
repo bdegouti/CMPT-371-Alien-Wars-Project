@@ -15,13 +15,6 @@
 #define SERVER_PORT "6969"
 #define MAXBUFFERBYTES 100
 
-int socket_fd;
-typedef struct addrinfo* addrinfo_list;
-char buffer[MAXBUFFERBYTES];
-addrinfo_list server_addrinfo_list;
-ssize_t bytes_sent;
-int bytes_received;
-
 // return boolean when error
 bool socket_error(int status, char* error_message);
 
