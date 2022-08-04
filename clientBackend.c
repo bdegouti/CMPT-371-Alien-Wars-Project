@@ -2,7 +2,7 @@
 
 int socket_fd;
 typedef struct addrinfo* addrinfo_list;
-char buffer[MAXBUFFERBYTES];
+//char buffer[MAXBUFFERBYTES];
 addrinfo_list server_addrinfo_list;
 ssize_t bytes_sent;
 int bytes_received;
@@ -57,6 +57,20 @@ void connectServer() {
     freeaddrinfo(server_addrinfo_list);
 }
 
+// receive players number from the server
+struct PlayersInfo serverGivePlayersInfo () {
+    // using socket recv to receive "2134"
+    // 2 for the player, 1 for the ally and so on
+    char* receivePlayerInfo = recvState();
+    struct PlayersInfo playersInfo;
+    playersInfo.player = receivePlayerInfo[0];
+    playersInfo.ally = receivePlayerInfo[1];
+    playersInfo.enemy1 = receivePlayerInfo[2];
+    playersInfo.enemy2 = receivePlayerInfo[3];
+    free(receivePlayerInfo);
+    return playersInfo;
+}
+
 // send command to the server
 void sendAction (char* ret) {
     bytes_sent = send(socket_fd, ret, MAXBUFFERBYTES, 0);
@@ -67,12 +81,16 @@ void sendAction (char* ret) {
 
 // receive the game state
 char* recvGameState () {
+    char buffer[MAXBUFFERBYTES];
+    char *gameState = (char*)malloc(MAXBUFFERBYTES); // needs to be freed in client main!
     bytes_received = recv(socket_fd, buffer, MAXBUFFERBYTES-1, 0);
     
     // recv error
     socket_error(bytes_received, "recv()");
     
-    return buffer;
+    strcpy(gameState, buffer);
+    memset(buffer, 0, MAXBUFFERBYTES);
+    return gameState;
 }
 
 // close socket

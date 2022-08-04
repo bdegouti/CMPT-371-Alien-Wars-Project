@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include "userInput.h"
+
 #define SERVER_PORT "6969"
 #define MAXBUFFERBYTES 100
 
@@ -26,6 +28,8 @@ struct addrinfo init_server_hints();
 
 // create a client socket and connect to the server
 void connectServer();
+
+struct PlayersInfo serverGivePlayersInfo ();
 
 // send command to the server
 void sendAction (char* ret);
