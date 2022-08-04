@@ -62,6 +62,9 @@ struct addrinfo * init_server_addr_list() {
     return server_addr_list;
 }
 
+/*
+POLL FUNCTIONS
+*/
 void addSocketInPoll(struct pollfd *fds[], int newfd, int *fd_count){
     (*fds)[*fd_count].fd = newfd;
     (*fds)[*fd_count].events = POLLIN;
@@ -73,11 +76,21 @@ void deleteSocketInPoll(struct pollfd pfds[], int i, int *fd_count){
     (*fd_count)--;
 }
 
+/*
+UTILITY FUNCTIONS
+*/
 void moveStrToHeap(char** str){
     char* tmp = *str;
     *str = malloc(sizeof(strlen(tmp)));
     strcpy(*str, tmp);
 }
+
+/*
+---------------------------------------------------------------------
+THE FUNCTIONS BELOW ARE RELATED TO SENDING OR RECEIVING DATA FROM CLIENTS
+WE NEED CONCRETE IDEA OF WHAT MESSAGES WILL LOOK LIKE TO IMPLEMENT
+---------------------------------------------------------------------
+*/
 
 //sends data to users every "round"
 void* sendDataToPlayers(void* data){
@@ -145,6 +158,12 @@ int getTargetFromAPI(char* target){
 void interpretPlayerMessage(struct Game* g, int player, char* msg){
     //todo
 }
+
+/*
+---------------------------------------------------------------------
+                END OF SEND/RECIEVE FUNCTIONS
+---------------------------------------------------------------------
+*/
 
 
 int main() {
@@ -231,13 +250,12 @@ int main() {
                     if(playerIsReady[0] && playerIsReady[1] && playerIsReady[2] && playerIsReady[3]){
                         gameStarted = true; 
                         //creates thread that will update gamestate and send data to players every x seconds
-                        //Todo: use mutex or semaphore to synchonize thread access to game struct, otherwise might be competing access.
                         struct argsToThread att;
                         att.g = game;
                         att.socks = serverSockets;
                         if(pthread_create(roundLoop, NULL, sendDataToPlayers, &att)){
                             perror("ERROR: failed at pthread_create");
-                            exit(0);
+                            return -1;
                         }
                     }
                 }
