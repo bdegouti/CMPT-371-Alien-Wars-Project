@@ -149,6 +149,9 @@ int getTargetFromAPI(char* target){
 
 //retrieve information from player transmission
 void interpretPlayerMessage(struct Game* g, int player, char* msg){
+    // ANDY CLIENTTOSERVERAPI - please modify using client_to_server_api code as reference
+    // My function can take a socket id, client data, and turn it into player, action, targetplayer struct. 
+
     char* msgType = (char*) malloc(10);
     strncpy(msgType, msg, 10);
 

@@ -167,7 +167,7 @@ struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum)
 
 void applyTask(struct Game *g, struct Player *p, struct Action *a)
 {
-    if (a->action == "attack")
+    if (a->action == "attack") // ANDY CLIENTTOSERVERAPI please change attack to att
     {
         if (p->isBoostActive)
         {
@@ -187,11 +187,11 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a)
             deletePlayer(g->players[a->target]);
         }
     }
-    else if (a->action == "defense")
+    else if (a->action == "defense") // ANDY CLIENTTOSERVERAPI please change defense to def 
     {
         p->health += 10;
     }
-    else if (a->action == "boost")
+    else if (a->action == "boost") // ANDY CLIENTTOSERVERAPI please change boost to gun 
     {
         p->gun++;
         if (p->gun == MAX_GUN_FILL)

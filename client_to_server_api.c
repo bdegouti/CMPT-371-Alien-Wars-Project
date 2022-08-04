@@ -1,80 +1,52 @@
 #include <stdio.h>
 #include <string.h>
 
-enum Action {Attack, Defend, Gun};
-enum Player {One, Two, Three, Four, Null};
 
 struct PlayerAction {
-    enum Player player;
-    enum Action action;
-    enum Player targetPlayer;
+    int player;
+    char* action;
+    int targetPlayer;
 };
 
 // Converts clientSocketId (1..4) and clientActionMsg("move targetPlayer") into PlayerAction struct. 
 struct PlayerAction getPlayerAction(int clientSocketId, char * clientActionMsg) {
     struct PlayerAction playerAction;
 
-    // Matching Player 
-    if (socket_id == 1) {
-        playerAction.player = One; 
-    } else if (socket_id == 2) {
-        playerAction.player = Two; 
-    } else if (socket_id == 3) {
-        playerAction.player = Three; 
-    } else if (socket_id == 4) {
-        playerAction.player = Four; 
-    }
+    playerAction.player = clientSocketId;
 
     // Matching Target Player 
-    if (userMsg[4] == '1') {
-        playerAction.targetPlayer = One;
-    } else if (userMsg[4] == '2') {
-        playerAction.targetPlayer = Two;
-    } else if (userMsg[4] == '3') {
-        playerAction.targetPlayer = Three;
-    } else if (userMsg[4] == '4') {
-        playerAction.targetPlayer = Four;
+    if (clientActionMsg[4] == '1') {
+        playerAction.targetPlayer = 1;
+    } else if (clientActionMsg[4] == '2') {
+        playerAction.targetPlayer = 2;
+    } else if (clientActionMsg[4] == '3') {
+        playerAction.targetPlayer = 3;
+    } else if (clientActionMsg[4] == '4') {
+        playerAction.targetPlayer = 4;
     }
 
     // Matching Action
-    if(strncmp(userMsg, "att", 3) == 0) {
-        playerAction.action = Attack;
-    } else if(strncmp(userMsg, "def", 3) == 0) {
-        playerAction.action = Defend;
-    } else if(strncmp(userMsg, "gun", 3) == 0) {
-        playerAction.action = Gun;
+    if(strncmp(clientActionMsg, "att", 3) == 0) {
+        playerAction.action = "att";
+    } else if(strncmp(clientActionMsg, "def", 3) == 0) {
+        playerAction.action = "def";
+    } else if(strncmp(clientActionMsg, "gun", 3) == 0) {
+        playerAction.action = "gun";
         playerAction.targetPlayer = playerAction.player; 
     }
 
     return playerAction;
 }
 
+// This function is for testing
 void print_PlayerAction(struct PlayerAction playerAction) {
-    switch (playerAction.player) {
-        case One: printf("One"); break;
-        case Two: printf("Two"); break;
-        case Three: printf("Three"); break;
-        case Four: printf("Four"); break;
-    };
-    printf(" ");
-
-    switch (playerAction.action) {
-        case Attack: printf("Attack"); break;
-        case Defend: printf("Defend"); break;
-        case Gun: printf("Gun"); break;
-    };
-    printf(" ");
-
-    switch (playerAction.targetPlayer) {
-        case One: printf("One"); break;
-        case Two: printf("Two"); break;
-        case Three: printf("Three"); break;
-        case Four: printf("Four"); break;
-    };
-    printf("\n");
+    printf("%d ", playerAction.player);
+    printf("%s ", playerAction.action);
+    printf("%d \n", playerAction.targetPlayer);
 }
 
 
+// This main function is for testing
 int main () {
     // This will be called inside a socket listen, and be passed to gamelogic. 
     struct PlayerAction pa1 = getPlayerAction(2, "att 3"); 
