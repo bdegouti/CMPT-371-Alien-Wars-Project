@@ -58,16 +58,16 @@ void connectServer() {
 }
 
 // receive players number from the server
-struct PlayersInfo serverGivePlayersInfo () {
+struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg) {
     // using socket recv to receive "2134"
     // 2 for the player, 1 for the ally and so on
-    char* receivePlayerInfo = recvState();
+    //char* receivePlayerInfo = recvState();
     struct PlayersInfo playersInfo;
-    playersInfo.player = receivePlayerInfo[0];
-    playersInfo.ally = receivePlayerInfo[1];
-    playersInfo.enemy1 = receivePlayerInfo[2];
-    playersInfo.enemy2 = receivePlayerInfo[3];
-    free(receivePlayerInfo);
+    playersInfo.player = playersInfoMsg[0];
+    playersInfo.ally = playersInfoMsg[1];
+    playersInfo.enemy1 = playersInfoMsg[2];
+    playersInfo.enemy2 = playersInfoMsg[3];
+    free(playersInfoMsg); // this is okay? (works in my machine)
     return playersInfo;
 }
 
@@ -80,7 +80,7 @@ void sendAction (char* ret) {
 }
 
 // receive the game state
-char* recvGameState () {
+char* recvState () {
     char buffer[MAXBUFFERBYTES];
     char *gameState = (char*)malloc(MAXBUFFERBYTES); // needs to be freed in client main!
     bytes_received = recv(socket_fd, buffer, MAXBUFFERBYTES-1, 0);
