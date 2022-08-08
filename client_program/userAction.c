@@ -1,4 +1,4 @@
-#include "userInput.h"
+#include "userAction.h"
 
 const char *ATT = "att";
 const char *DEF = "def";
@@ -26,7 +26,7 @@ const char TARGET_ERROR[] = "\033[31mInvalid Player Target!\033[0m\nValid target
 // gets user input
 // checks for user input error
 // returns valid user move
-char *getUserInput(struct PlayersInfo playersInfo)
+char *getUserAction(struct PlayersInfo playersInfo)
 {
     char buffer[7];                // input size of 5 + \n + \0
     char *ret = (char *)malloc(6); // 5 + \0

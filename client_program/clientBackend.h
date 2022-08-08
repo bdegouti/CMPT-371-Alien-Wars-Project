@@ -1,5 +1,5 @@
-#ifndef _clientBackend_h
-#define _clientBackend_h
+#ifndef clientBackend_h
+#define clientBackend_h
 
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-#include "userInput.h"
+#include "clientGameDataStructures.h"
 
 #define SERVER_PORT "6969"
 #define MAXBUFFERBYTES 100
