@@ -1,3 +1,4 @@
+// THIS IS ALL PSUDO CODE!
 
 bool start_server() {
     server_socket = init_server_socket();
