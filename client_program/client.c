@@ -1,9 +1,16 @@
+// Main Client File 
+// Run using make client
+// ./client 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdbool.h>
+
+// TODO: Move all GameLogic to this file
+// #include "clientGameLogic.h"
 #include "userInput.h"
 
 bool gameOver = false; // true when game over
