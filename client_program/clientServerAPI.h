@@ -3,7 +3,8 @@
 
 #include <stdio.h>
 #include "clientGameDataStructures.h"
-// include clientBackend.h 
+
+#include "clientBackend.h" //added by Yosup
 
 
 // startGame() functions

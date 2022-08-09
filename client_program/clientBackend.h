@@ -1,7 +1,6 @@
 #ifndef clientBackend_h
 #define clientBackend_h
 
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,13 +28,13 @@ struct addrinfo init_server_hints();
 // create a client socket and connect to the server
 void connectServer();
 
-struct PlayersInfo serverGivePlayersInfo ();
+struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg);
 
 // send command to the server
 void sendAction (char* ret);
 
 // receive the game state
-char* recvGameState();
+char* recvState();
 
 // close socket
 void closeSocket();
