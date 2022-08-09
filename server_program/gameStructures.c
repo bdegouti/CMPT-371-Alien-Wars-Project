@@ -175,10 +175,63 @@ int whoWon(struct Game *g){
         return 1;  // Team 1 won.
     } else if (g->players[0] == NULL && g->players[1] == NULL) {
         return 2;  // Team 2 won.
-    } else return 0;
+    } else return 0; // Game not over.
 }
 
+// Example: player 1 queue att 2 att 2 att 1 att 2 att 1 endqueue stats 13 16 endstats endplayer
+char* getQueueNodeAsString(struct Player *p){
+    char str[80];
+
+    char playerNum[1];
+    char playerHealth[1];
+    char playerGun[1];
+
+    sprintf(playerNum, "%d", p->num);
+    sprintf(playerHealth, "%d", p->health);
+    sprintf(playerGun, "%d", p->gun);
+
+    strcpy (str, "gamestate gamenotover player "); 
+    strcpy (str, playerNum); 
+    strcpy (str, " queue ");
+
+    struct Action *temp = (struct Action*)malloc(sizeof(struct Action));
+    temp = createNode(p->queue->head->action, p->queue->head->target);
+    char tempTargetNum[1];
+    
+    for (int i = 0; i < p->queue->size; i++){
+        
+        sprintf(tempTargetNum, "%d", temp->target);
+        
+        strcpy (str, temp->action);
+        strcpy (str, " ");
+        strcpy (str, tempTargetNum);
+        strcpy (str, " ");
+
+        temp = temp->next;
+    }
+    free(temp);
+    temp = NULL;
+
+    strcpy (str, " endqueue stats ");
+    strcpy (str, playerHealth);
+    strcpy (str, " ");
+    strcpy (str, playerGun);
+    strcpy (str, " endstats endplayer ");
+}
 
 char *getGameStateAsString(struct Game *g){
-    return NULL;
+    char str[1000];
+
+    if (g->gameover == true) 
+        return "gamestate gameover endgamestate";
+    else{
+        strcpy (str, "gamestate gamenotover"); 
+
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            strcpy (str, getQueueNodeAsString(g->players[i]));
+        } 
+        strcpy (str, " endgamestate");
+    }
+
+    return str;
 }
