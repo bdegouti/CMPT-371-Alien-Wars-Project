@@ -1,9 +1,5 @@
 #include "userAction.h"
 
-const char *ATT = "att";
-const char *DEF = "def";
-const char *GUN = "gun";
-
 // enum for console colors
 enum theme
 {

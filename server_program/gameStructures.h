@@ -100,3 +100,7 @@ void addActionToPlayer(struct Game* g, int playerNum, char* action, int target);
  */
 struct Action* getCurrentActionForPlayer(struct Game* g, int playerNum);
 
+/*
+ * return the winner of the game
+ */
+int whoWon(struct Game *g);
