@@ -27,11 +27,15 @@ Client Server Close Connection: When the GameLogic sends a game over gamestate t
 the server will send the game over gamestate to the 4 clients, and then the server will close. 
 When a client recieves a game over gamestate, it will close its connection. 
 
+## Application Layer Messaging Scheme
+Our Application sends messages through converting game objects into text, using sockets to send and recieve the message, 
+and then sends the text to a converter which creates game objects for the reciever. 
+For example, a gamestate is converted from various objects which hold gamestate data such as player queues into a single string,
+which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects. 
 
-## Development Notes 
-- Be sure to pull the repo before you make changes. Try to prevent merge conflicts as much as possidble.
-- compile in linux using gcc.
-- Delete your output files! 
-- Use camelCase.
-- Avoid using typedef unless impossible otherwise. 
-- 4 spaces.
+## Group Members and their % contribution
+Ben de Goutiere - 20%  
+Kerem Sarisen - 20%  
+Mike Ostrowka - 20%  
+Andy Wang - 20%  
+Yosup Cheon - 20%  
