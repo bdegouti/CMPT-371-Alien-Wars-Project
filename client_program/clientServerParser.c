@@ -1,7 +1,5 @@
 #include "clientServerParser.h"
 
-bool initUpdate = true;
-
 bool checkGameState(char *message) {
     return !strncmp(message, GAMESTATE, strlen(GAMESTATE));
 }
@@ -45,8 +43,9 @@ int getStats(char *message) {
     }
 }
 
-struct Player *getPlayer(char * message, struct Player * player) {
+struct Player *getPlayer(char * message, struct Game * game) {
     int playerNum = getPlayerNum(message);
+    struct Player * player = game->players[playerNum];
     message += 2; //slide pointer to start of queue
     message += strlen(QUEUE) + 1;
     while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
@@ -62,22 +61,18 @@ struct Player *getPlayer(char * message, struct Player * player) {
     message += strlen(END_PLAYER) + 1;
 }
 
-struct Game parseServer(char *serverMessage) {
+struct Game parseServer(char *serverMessage, struct Game * game) {
     if(!checkGameState(serverMessage)) return;
-
-    if(initUpdate) {
-        game = initGameState();
-        initUpdate = false;
-    }
 
     char *message = serverMessage; //copy to a working copy
     message += strlen(GAMESTATE) + 1;
     
     bool gameOver = checkGameState(message);
+    game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
-        getPlayer(message, game->players[i]);
+        getPlayer(message, game);
     }
     
 }

@@ -7,7 +7,8 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
-#include "clientGameDataStructures.h" // IMPORTANT: Please View! 
+#include "clientGameDataStructures.h" // IMPORTANT: Please View!
+#include "../server_program/gameStructures.h"
 #include "playerGameInstructions.h"
 #include "userAction.h"
 #include "clientServerAPI.h"
@@ -21,19 +22,17 @@ struct PlayersInfo startGame() {
 }
 
 // Returns endgame gameState
-struct GameState playGame(struct PlayersInfo playersInfo) {
-    struct GameState currentGameState;
-    currentGameState.gameOver = false;
-    currentGameState.gameOverMsg = "You Won!"; // ONLY FOR TESTING
+struct Game *playGame(struct PlayersInfo playersInfo, struct Game * game) {
 
-    while (!currentGameState.gameOver) {
+    while (!game->gameover) {
         char* userAction = getUserAction(playersInfo);
         sendToServer(userAction);
-        currentGameState = getCurrentGameState();
-        displayGameState(currentGameState);
+        // currentGameState = getCurrentGameState();
+        // displayGameState(currentGameState);
+
     }
 
-    return currentGameState;
+    return game;
 }
 
 // TODO: Needs Work - What does GameState Look Like? 
@@ -47,9 +46,11 @@ void gameOver(struct GameState endGameState) {
 int main(int argc, char *argv[]) {
     struct PlayersInfo playersInfo = startGame();
 
+    struct Game * game = initGameState();
+
     print_how_to_play(playersInfo);
 
-    struct GameState endGameState = playGame(playersInfo); 
+    struct Game *endGameState = playGame(playersInfo, game); 
 
-    gameOver(endGameState);
+   // gameOver(endGameState);
 }
