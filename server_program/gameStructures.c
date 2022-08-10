@@ -235,8 +235,11 @@ char* getQueueNodeAsString(struct Player *p){
 
 char *getGameStateAsString(struct Game *g){
     char* str = (char*) malloc(BUFFER_SIZE);
-    if (g->gameover == true) 
-        return "gamestate gameover endgamestate";
+    if (g->gameover == true){
+        int winningTeam = whoWon(g);
+        snprintf(str, BUFFER_SIZE, "gamestate gameover %d endgamestate", winningTeam);
+        strcpy(str, "gamestate gameover endgamestate");
+    }
     else{
         strcpy (str, "gamestate gamenotover"); 
 
