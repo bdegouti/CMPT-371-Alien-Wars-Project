@@ -87,7 +87,10 @@ void deletePlayer(struct Player* p);
  */
 struct Game* initGameState();
 
-void randomizePlayOrder(int** players);
+/*
+ * returns array representing play order for the round
+ */
+int* randomizePlayOrder();
 /*
 Executes a single round of the Game
 */
@@ -109,6 +112,17 @@ void addActionToPlayer(struct Game* g, int playerNum, char* action, int target);
 struct Action* getCurrentActionForPlayer(struct Game* g, int playerNum);
 
 /*
+ * executes the task at the top of a player's queue
+ */
+void applyTask(struct Game *g, struct Player *p, struct Action *a);
+
+/*
  * return the winner of the game
  */
 int whoWon(struct Game *g);
+
+
+/*
+ * returns stringified game state
+ */
+char *getGameStateAsString(struct Game *g);

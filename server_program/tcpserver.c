@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <poll.h>
 #include <pthread.h>
-#include "gameStructures.c"
+#include "gameStructures.h"
 #include "client_to_server_api.c"
 
 
@@ -174,7 +174,6 @@ void interpretPlayerMessage(struct Game* g, int player, char* msg){
 
 
 int main() {
-
     pthread_mutex_init(&canAccessGameData, NULL);
     // server_addr_list 
     struct addrinfo * server_addr_list = init_server_addr_list();
@@ -242,7 +241,7 @@ int main() {
     //tell players that all players have arrived
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         char* introMsg = getIntroduction(i);
-        send(serverSockets[i].fd, introMsg, strlen(SMALL_BUFFER), 0);
+        send(serverSockets[i].fd, introMsg, strlen(introMsg), 0);
     }
 
     //declare thread var
@@ -324,7 +323,7 @@ int main() {
     }
     
     //close thread
-    pthread_exit(roundLoop);
+    pthread_exit(&roundLoop);
 
     endGameState(game);
     

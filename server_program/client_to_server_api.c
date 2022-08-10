@@ -1,4 +1,4 @@
-clientServer
+//clientServer;
 
 
 
@@ -67,7 +67,9 @@ void print_PlayerAction(struct PlayerAction playerAction) {
 
 
 // This main function is for testing
+/*
 int main () {
+
     // This will be called inside a socket listen, and be passed to gamelogic. 
     struct PlayerAction pa1 = getPlayerAction(2, "att 3"); 
     struct PlayerAction pa2 = getPlayerAction(2, "def 1"); 
@@ -83,3 +85,4 @@ int main () {
 
     return 0;
 }
+*/

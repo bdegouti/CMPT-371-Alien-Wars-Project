@@ -112,24 +112,29 @@ void addActionToPlayer(struct Game *g, int playerNum, char *action, int target){
 }
 
 //randomizes which player goes first.
-void randomizePlayOrder(int** players){
+int* randomizePlayOrder(){
+    int* playOrder = (int*) malloc(NUM_OF_PLAYERS*sizeof(int));
+    for(int i = 0; i < NUM_OF_PLAYERS; i++){
+        playOrder[i] = i;
+    }
+
     size_t i;
     for (i = 0; i < NUM_OF_PLAYERS-1; i++){
         size_t j = i + rand() / (RAND_MAX / (NUM_OF_PLAYERS - i) + 1);
-        int t = *players[j];
-        *players[j] = *players[i];
-        *players[i] = t;
+        int t = playOrder[j];
+        playOrder[j] = playOrder[i];
+        playOrder[i] = t;
     }
 }
 
 //execeutes a  single round of the game
 void executeRound(struct Game* g){
-    int playOrder[] = {0, 1, 2, 3};
-    randomizePlayOrder(&playOrder);
+    int* playOrder = randomizePlayOrder();
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         struct Action* pAction = getCurrentActionForPlayer(g, playOrder[i]);
-        applyTask(g, pAction->target, pAction->action);
+        applyTask(g, g->players[i], pAction);
     }
+    free(playOrder);
 }
 
 // If a player's next command is "gun boost" while another player is using the gun boost. That command is being ignored.
