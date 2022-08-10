@@ -207,7 +207,7 @@ char* getQueueNodeAsString(struct Player *p){
     char playerHealth[SMALL_BUFFER];
     char playerGun[SMALL_BUFFER];
 
-    snprintf(playerNum, SMALL_BUFFER, "%d", p->num);
+    snprintf(playerNum, SMALL_BUFFER, "%d", (p->num+1));
     snprintf(playerHealth, SMALL_BUFFER, "%d", p->health);
     snprintf(playerGun, SMALL_BUFFER, "%d", p->gun);
 

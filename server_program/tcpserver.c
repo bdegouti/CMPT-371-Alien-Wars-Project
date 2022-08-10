@@ -288,6 +288,12 @@ int main() {
                     pthread_mutex_unlock(&canAccessGameData);
                 }
                 else{
+
+                    if(!playerIsReady[i]){
+                        snprintf(buffer, "Player %d is ready!", (i+1));
+                        sendToEachPlayer(buffer, serverSockets);
+                    }
+                    
                     playerIsReady[i] = true;
 
                     /*FOR TESTING PURPOSES*/
