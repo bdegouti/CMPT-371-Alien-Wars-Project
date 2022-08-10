@@ -290,10 +290,10 @@ int main() {
                 else{
 
                     if(!playerIsReady[i]){
-                        snprintf(buffer, "Player %d is ready!", (i+1));
+                        snprintf(buffer, BUFFER_SIZE, "Player %d is ready!", (i+1));
                         sendToEachPlayer(buffer, serverSockets);
                     }
-                    
+
                     playerIsReady[i] = true;
 
                     /*FOR TESTING PURPOSES*/
