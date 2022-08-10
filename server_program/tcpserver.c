@@ -102,7 +102,7 @@ void sendToEachPlayer(char* msg, struct pollfd* serverSockets){
         if(bytes < 0){
             char buffer[BUFFER_SIZE];
             memset(buffer, 0, BUFFER_SIZE);
-            sprintf(buffer, "Error:failed to send round data to p%d",(i+1));
+            snprintf(buffer, BUFFER_SIZE, "Error:failed to send round data to p%d",(i+1));
             perror(buffer);
         }
     }
@@ -125,7 +125,7 @@ void* roundDataSender(void* data){
         executeRound(g);
 
         char* gameState = getGameStateAsString(g);
-        sprintf(buffer, "%s", gameState);
+        snprintf(buffer, BUFFER_SIZE, "%s", gameState);
         free(gameState);
         sendToEachPlayer(buffer, socks);
         pthread_mutex_unlock(&canAccessGameData);
@@ -217,7 +217,7 @@ int main() {
         else{
             addSocketInPoll(&serverSockets, newSocket, &currServerConnections);
             memset(buffer, 0, BUFFER_SIZE);
-            sprintf(buffer, "p%d\n", currServerConnections);
+            snprintf(buffer, BUFFER_SIZE, "p%d\n", currServerConnections);
             send(newSocket, buffer, strlen(buffer), 0);
         }
     }
@@ -229,7 +229,7 @@ int main() {
     //tell players that all players have arrived
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         memset(buffer, 0, BUFFER_SIZE);
-        sprintf(buffer, ALL_PLAYER_ARRIVED_MESSAGE);
+        snprintf(buffer, BUFFER_SIZE, ALL_PLAYER_ARRIVED_MESSAGE);
         send(serverSockets[i].fd, buffer, strlen(buffer), 0);
     }
 
@@ -275,7 +275,7 @@ int main() {
 
                     if(playerIsReady[0] && playerIsReady[1] && playerIsReady[2] && playerIsReady[3]){
                         gameStarted = true;
-                        sprintf(buffer, GAME_START_MESSAGE);
+                        snprintf(buffer, BUFFER_SIZE, GAME_START_MESSAGE);
                         sendToEachPlayer(buffer, serverSockets);
                         //creates thread that will update gamestate and send data to players every x seconds
                         
