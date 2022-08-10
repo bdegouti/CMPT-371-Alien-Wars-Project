@@ -196,48 +196,45 @@ int whoWon(struct Game *g){
 
 // Example: player 1 queue att 2 att 2 att 1 att 2 att 1 endqueue stats 13 16 endstats endplayer
 char* getQueueNodeAsString(struct Player *p){
-    char* str = malloc(BUFFER_SIZE);
+    char* str = (char*) malloc(BUFFER_SIZE);
 
-    char playerNum[1];
-    char playerHealth[1];
-    char playerGun[1];
+    char playerNum[SMALL_BUFFER];
+    char playerHealth[SMALL_BUFFER];
+    char playerGun[SMALL_BUFFER];
 
-    sprintf(playerNum, "%d", p->num);
-    sprintf(playerHealth, "%d", p->health);
-    sprintf(playerGun, "%d", p->gun);
+    snprintf(playerNum, SMALL_BUFFER, "%d", p->num);
+    snprintf(playerHealth, SMALL_BUFFER, "%d", p->health);
+    snprintf(playerGun, SMALL_BUFFER, "%d", p->gun);
 
     strcpy (str, "gamestate gamenotover player "); 
-    strcpy (str, playerNum); 
-    strcpy (str, " queue ");
-
-    struct Action *temp = (struct Action*)malloc(sizeof(struct Action));
-    temp = createNode(p->queue->head->action, p->queue->head->target);
-    char tempTargetNum[1];
     
-    for (int i = 0; i < p->queue->size; i++){
+    strcat (str, playerNum); 
+    strcat (str, " queue ");
+
+    struct Action *temp = p->queue->head;
+    char tempTargetNum[SMALL_BUFFER];
+    
+    while(temp != NULL){
+        memset(tempTargetNum, 0, SMALL_BUFFER);
+        snprintf(tempTargetNum, SMALL_BUFFER, "%d", temp->target);
         
-        sprintf(tempTargetNum, "%d", temp->target);
-        
-        strcpy (str, temp->action);
-        strcpy (str, " ");
-        strcpy (str, tempTargetNum);
+        strcat (str, temp->action);
+        strcat (str, " ");
+        strcat (str, tempTargetNum);
         strcpy (str, " ");
 
         temp = temp->next;
     }
-    free(temp);
-    temp = NULL;
 
-    strcpy (str, " endqueue stats ");
-    strcpy (str, playerHealth);
-    strcpy (str, " ");
-    strcpy (str, playerGun);
-    strcpy (str, " endstats endplayer ");
+    strcat (str, " endqueue stats ");
+    strcat (str, playerHealth);
+    strcat (str, " ");
+    strcat (str, playerGun);
+    strcat (str, " endstats endplayer ");
 }
 
 char *getGameStateAsString(struct Game *g){
-    char* str = malloc(BUFFER_SIZE);
-
+    char* str = (char*) malloc(BUFFER_SIZE);
     if (g->gameover == true) 
         return "gamestate gameover endgamestate";
     else{
@@ -245,10 +242,10 @@ char *getGameStateAsString(struct Game *g){
 
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             char* tmp = getQueueNodeAsString(g->players[i]);
-            strcpy (str, tmp);
+            strcat (str, tmp);
             free(tmp);
         } 
-        strcpy (str, " endgamestate");
+        strcat (str, " endgamestate\0");
     }
 
     return str;
