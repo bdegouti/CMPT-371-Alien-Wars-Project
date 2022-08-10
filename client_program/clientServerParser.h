@@ -19,6 +19,7 @@ const char *END_STATS = "endstats";
 const int ACTION_LENGTH = 6;
 
 
+//global client gamestate
 struct Game * game;
 
 struct Game parseServer(char *serverMessage);
