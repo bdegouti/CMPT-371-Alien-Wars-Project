@@ -7,7 +7,8 @@
 #include <stdbool.h>
 #include <poll.h>
 #include <pthread.h>
-#include "gameStructures.h"
+#include "gameStructures.c"
+#include "client_to_server_api.c"
 
 
 #include <sys/types.h>
@@ -16,7 +17,6 @@
 
 #define BACKLOG 6
 #define SERVER_PORT "6954" //Server port number
-#define BUFFER_SIZE 8192 //size of buffer (subject to change)
 #define TURN_LENGTH 5 //length of turn (secs)
 
 #define ALL_PLAYER_ARRIVED_MESSAGE  "AllPlayersHere"
@@ -122,33 +122,15 @@ void* roundDataSender(void* data){
         sleep(TURN_LENGTH);
         pthread_mutex_lock(&canAccessGameData);
         
-        //Todo: perform player actions for round
+        executeRound(g);
 
-        if(g->gameover){
-            //Todo: send game end data and exit 
-        }
-
-        sprintf(buffer, "test\n"); //Todo: getListAsString(g);
+        char* gameState = getGameStateAsString(g);
+        sprintf(buffer, "%s", gameState);
+        free(gameState);
         sendToEachPlayer(buffer, socks);
         pthread_mutex_unlock(&canAccessGameData);
     }
 
-}
-
-//get action via API tranlsation (DON'T REALLY NEED THIS, BUT NOT GOING TO DELETE JUST YET)
-char* getActionFromAPI(char* action){
-    if(strcmp(action, "att") == 0){
-        return "attack";
-    }
-    else if(strcmp(action, "def") == 0){
-        return "defence";
-    }
-    else if(strcmp(action, "gun") == 0){
-        return "gun";
-    }
-    else{
-        return "ukn";
-    }
 }
 
 //get Target via API translation
@@ -172,7 +154,8 @@ int getTargetFromAPI(char* target){
 
 //retrieve information from player transmission
 void interpretPlayerMessage(struct Game* g, int player, char* msg){
-    //todo
+    struct PlayerAction PlayerAction = getPlayerAction(player, msg);
+    addActionToPlayer(g, player, PlayerAction.action, PlayerAction.targetPlayer);
 }
 
 /*

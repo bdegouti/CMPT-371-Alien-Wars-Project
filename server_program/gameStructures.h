@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h> 
 
+#define BUFFER_SIZE 8192 //size of buffer (subject to change)
 #define NUM_OF_PLAYERS 4
 #define DEFAULT_GUN 0
 #define DEFAULT_HEALTH 100
@@ -84,6 +85,12 @@ void deletePlayer(struct Player* p);
  *initializes gamestate and sets up empty player structures
  */
 struct Game* initGameState();
+
+void randomizePlayOrder(int** players);
+/*
+Executes a single round of the Game
+*/
+void executeRound(struct Game* g);
 
 /*
  *ends game and frees used memory in self and all substructures
