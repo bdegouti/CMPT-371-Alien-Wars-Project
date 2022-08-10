@@ -9,6 +9,9 @@
 
 #include "clientGameDataStructures.h"
 
+const char *ATT = "att";
+const char *DEF = "def";
+const char *GUN = "gun";
 
 char* getUserAction(struct PlayersInfo playersInfo);
 
