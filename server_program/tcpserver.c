@@ -113,31 +113,33 @@ void* roundDataSender(void* data){
     //data be an argsToThread struct*
     struct argsToThread* att = (struct argsToThread*) data;
     struct Game* game = att->g;
-    char buffer[BUFFER_SIZE];
 
     //socks is a shared element, but should be threadsafe (relevant data is not changed)
     struct pollfd* socks = att->socks;
     while(true){
-        memset(buffer, 0, BUFFER_SIZE);
+        //pauses for length of turn
         sleep(TURN_LENGTH);
         pthread_mutex_lock(&canAccessGameData);
         
+        //executes round of game
         executeRound(game);
 
+        //gets gameState as string
         char* gameState = getGameStateAsString(game);
-        snprintf(buffer, BUFFER_SIZE, "%s", gameState);
+        sendToEachPlayer(gameState, socks);
         free(gameState);
 
-        sendToEachPlayer(buffer, socks);
-
         if(game->gameover){
+            pthread_mutex_unlock(&canAccessGameData);
             break;
         }
+
         pthread_mutex_unlock(&canAccessGameData);
     }
 
 }
 
+//sends gamesetup info to players (player number, teammates player number, enemy numbers)
 char* getIntroduction(int i){
     char* introMsg = (char*) malloc(SMALL_BUFFER);
     if((i+1) == 1){
