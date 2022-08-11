@@ -6,6 +6,7 @@ struct PlayerQueue *createPlayerQueue(){
     pq->head = NULL;
     pq->tail = NULL;
     pq->size = 0;
+    return pq;
 }
 
 // creates taskNode (used in enqueueNewTask, do not use elsewhere)
@@ -78,6 +79,7 @@ struct Player *createPlayer(int num){
     p->queue = createPlayerQueue();
     p->isBoostActive = false;
     p->boostCount = 0;
+    return p;
 }
 
 void deletePlayer(struct Player *p){
@@ -125,6 +127,7 @@ int* randomizePlayOrder(){
         playOrder[j] = playOrder[i];
         playOrder[i] = t;
     }
+    return playOrder;
 }
 
 //execeutes a  single round of the game
@@ -236,6 +239,7 @@ char* getQueueNodeAsString(struct Player *p){
     strcat (str, " ");
     strcat (str, playerGun);
     strcat (str, " endstats endplayer ");
+    return str;
 }
 
 char *getGameStateAsString(struct Game *g){
