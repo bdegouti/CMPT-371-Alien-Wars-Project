@@ -30,26 +30,29 @@ void displayGame(struct Game *game, struct PlayersInfo info) {
 }
 
 
-int main() {
-    struct Game * game = initGameState();
-    game->gameover = false;
-    for(int i = 0; i < NUM_OF_PLAYERS; i++) {
-        game->players[i]->gun = 70;
-        game->players[i]->health = 60;
-        char * test = "gun";
-        char * test2 = "def";
-        enqueueNewTask(game->players[i]->queue, test, i);
-        enqueueNewTask(game->players[i]->queue, test2, i);
-    }
-    struct PlayersInfo player;
-    player.ally = 2;
-    player.player = 1;
-    player.enemy1 = 3;
-    player.enemy2 = 4;
-    displayGame(game, player);
-    game->players[0]->health = 0;
-    game->players[1]->health = 0;
-    game->gameover = true;
-    displayGame(game, player);
-    return 0;
-}
+// int main() {
+//     struct Game * game = initGameState();
+//     game->gameover = false;
+//     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
+//         game->players[i]->gun = 70;
+//         game->players[i]->health = 60;
+//         char * test = "gun";
+//         char * test2 = "def";
+//         enqueueNewTask(game->players[i]->queue, test, i);
+//         enqueueNewTask(game->players[i]->queue, test2, i);
+//     }
+//     struct PlayersInfo player;
+//     player.ally = 2;
+//     player.player = 1;
+//     player.enemy1 = 3;
+//     player.enemy2 = 4;
+//     displayGame(game, player);
+//     game->players[0]->health = 0;
+//     game->players[1]->health = 0;
+//     game->gameover = true;
+//     displayGame(game, player);
+//     return 0;
+// }
+
+// gcc -o test clientGUI.c ../server_program/gameStructures.c
+// ^^^^^^^^^^ run to test
