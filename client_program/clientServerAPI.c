@@ -14,17 +14,20 @@ struct PlayersInfo getPlayersInfo() {
     // by knowing who to send
     // send in the order of player, ally, enemy 1 and 2
     // for example, 2, 1, 3, 4; if the player is assigned 2
-    char* playersInfoMsg = recvState();
-    struct PlayersInfo playersInfo = convertPlayersInfoMsg(playersInfoMsg); 
+
+    
+    // char* playersInfoMsg = recvState();
+    // struct PlayersInfo playersInfo = convertPlayersInfoMsg(playersInfoMsg); 
+    //UNCOMMENT ABOVE LINE AFTER TESTING ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     // TEMPORARY TESTING CODE 
-    /*
     struct PlayersInfo playersInfo;
     playersInfo.player = '1';
     playersInfo.ally   = '2';
     playersInfo.enemy1 = '3';
     playersInfo.enemy2 = '4';
-    */
+    
     
     // by Yosup
     // by Yosup
