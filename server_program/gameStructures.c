@@ -249,20 +249,20 @@ char* getQueueNodeAsString(struct Player *p){
 
 char *getGameStateAsString(struct Game *g){
     char* str = (char*) malloc(BUFFER_SIZE);
-    if (g->gameover == true){
-        int winningTeam = whoWon(g);
-        snprintf(str, BUFFER_SIZE, "gamestate gameover t%d endgamestate", winningTeam);
+    strcpy (str, "gamestate ");
+    if(g->gameover){
+        strcat(str, "gameover ");
     }
     else{
-        strcpy (str, "gamestate gamenotover "); 
-
-        for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            char* tmp = getQueueNodeAsString(g->players[i]);
-            strcat (str, tmp);
-            free(tmp);
-        } 
-        strcat (str, "endgamestate\0");
+        strcat(str, "gamenotover ");
     }
+
+    for (int i = 0; i < NUM_OF_PLAYERS; i++){
+        char* tmp = getQueueNodeAsString(g->players[i]);
+        strcat (str, tmp);
+        free(tmp);
+    } 
+    strcat (str, "endgamestate\0");
 
     return str;
 }
