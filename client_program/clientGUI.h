@@ -4,6 +4,7 @@
 #include "clientServerParser.h"
 #include "../server_program/gameStructures.h"
 #include "clientGameDataStructures.h"
+#include "userAction.h"
 
 const char * GUI_INTRO;
 const char * GUI_YOUR_TEAM;
