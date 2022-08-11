@@ -1,6 +1,3 @@
-#ifndef GAME_STRUCTURES_H
-#define GAME_STRUCTURES_H
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -95,9 +92,10 @@ struct Game* initGameState();
  */
 int* randomizePlayOrder();
 /*
-Executes a single round of the Game
+Executes a single round of the Game. If round has someone try to use gun while gun is locked,
+will return with array informing the server of the playernumber of that player.
 */
-void executeRound(struct Game* g);
+int* executeRound(struct Game* g);
 
 /*
  *ends game and frees used memory in self and all substructures
@@ -129,5 +127,3 @@ int whoWon(struct Game *g);
  * returns stringified game state
  */
 char *getGameStateAsString(struct Game *g);
-
-#endif
