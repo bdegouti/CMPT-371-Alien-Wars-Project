@@ -1,6 +1,5 @@
 #include "clientServerAPI.h"
 
-
 // startGame() functions
 
 void connectToServer() {
@@ -35,7 +34,6 @@ struct PlayersInfo getPlayersInfo() {
     return playersInfo; 
 }
 
-
 // playGame() functions
 
 void sendToServer(char* userAction) {
@@ -54,9 +52,3 @@ struct Game * getCurrentGameState(struct Game *game) {
     game = parseServer(gameStateMsg, game);
     return game;
 }
-
-// TODO Implement
-void displayGameState(struct Game currentGameState) {
-    printf("Future displayGameState\n");
-}
-

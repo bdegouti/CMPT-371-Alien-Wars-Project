@@ -15,5 +15,4 @@ const char * GUN;
 
 char* getUserAction(struct PlayersInfo playersInfo);
 
-
 #endif
