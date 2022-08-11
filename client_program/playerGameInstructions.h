@@ -5,8 +5,6 @@
 
 #include "clientGameDataStructures.h"
 
-
 void print_how_to_play(struct PlayersInfo playersInfo);
-
 
 #endif

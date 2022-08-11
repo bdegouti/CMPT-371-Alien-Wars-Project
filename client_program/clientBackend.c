@@ -94,6 +94,6 @@ char* recvState () {
 }
 
 // close socket
-void closeSocket(){
+void closeSocket() {
     close(socket_fd);
 }

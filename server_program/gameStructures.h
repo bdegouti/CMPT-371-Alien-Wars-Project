@@ -1,3 +1,6 @@
+#ifndef GAME_STRUCTURES_H
+#define GAME_STRUCTURES_H
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -126,3 +129,5 @@ int whoWon(struct Game *g);
  * returns stringified game state
  */
 char *getGameStateAsString(struct Game *g);
+
+#endif

@@ -9,11 +9,10 @@
 
 #include "clientGameDataStructures.h"
 
-const char *ATT = "att";
-const char *DEF = "def";
-const char *GUN = "gun";
+const char * ATT;
+const char * DEF;
+const char * GUN;
 
 char* getUserAction(struct PlayersInfo playersInfo);
-
 
 #endif

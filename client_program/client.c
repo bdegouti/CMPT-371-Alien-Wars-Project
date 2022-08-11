@@ -1,5 +1,3 @@
-// make, ./client 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +11,7 @@
 #include "userAction.h"
 #include "clientServerAPI.h"
 #include "clientBackend.h"
-
+#include "clientGUI.h"
 
 struct PlayersInfo startGame() {
     connectToServer();
@@ -21,36 +19,22 @@ struct PlayersInfo startGame() {
     return playersInfo;
 }
 
-// Returns endgame gameState
-struct Game *playGame(struct PlayersInfo playersInfo, struct Game * game) {
-
+// Multithread Me
+void playGame(struct PlayersInfo playersInfo, struct Game * game) {
     while (!game->gameover) {
         char* userAction = getUserAction(playersInfo);
         sendToServer(userAction);
-        // currentGameState = getCurrentGameState();
-        // displayGameState(currentGameState);
-
+        getCurrentGameState(game);
+        displayGame(game, playersInfo);
     }
-
-    return game;
 }
-
-// TODO: Needs Work - What does GameState Look Like? 
-void gameOver(struct GameState endGameState) {
-    printf("%s \n", endGameState.gameOverMsg);
-    
-    printf("Game Over!\n");
-}
-
 
 int main(int argc, char *argv[]) {
     struct PlayersInfo playersInfo = startGame();
 
-    struct Game * game = initGameState();
+    struct Game* game = initGameState();
 
     print_how_to_play(playersInfo);
 
-    struct Game *endGameState = playGame(playersInfo, game); 
-
-   // gameOver(endGameState);
+    playGame(playersInfo, game); 
 }
