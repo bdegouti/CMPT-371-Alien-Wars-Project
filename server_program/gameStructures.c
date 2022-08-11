@@ -211,7 +211,7 @@ char* getQueueNodeAsString(struct Player *p){
     snprintf(playerHealth, SMALL_BUFFER, "%d", p->health);
     snprintf(playerGun, SMALL_BUFFER, "%d", p->gun);
 
-    strcpy (str, "gamestate gamenotover player "); 
+    strcpy (str, "player "); 
     
     strcat (str, playerNum); 
     strcat (str, " queue ");
@@ -231,7 +231,7 @@ char* getQueueNodeAsString(struct Player *p){
         temp = temp->next;
     }
 
-    strcat (str, " endqueue stats ");
+    strcat (str, "endqueue stats ");
     strcat (str, playerHealth);
     strcat (str, " ");
     strcat (str, playerGun);
@@ -242,7 +242,7 @@ char *getGameStateAsString(struct Game *g){
     char* str = (char*) malloc(BUFFER_SIZE);
     if (g->gameover == true){
         int winningTeam = whoWon(g);
-        snprintf(str, BUFFER_SIZE, "gamestate gameover %d endgamestate", winningTeam);
+        snprintf(str, BUFFER_SIZE, "gamestate gameover t%d endgamestate", winningTeam);
         strcpy(str, "gamestate gameover endgamestate");
     }
     else{
