@@ -202,6 +202,26 @@ int whoWon(struct Game *g){
     } else return 0; // Game not over.
 }
 
+char *getQueueAsString(struct Player *p) {
+    char *str = (char *)malloc(BUFFER_SIZE);
+    struct Action *temp = p->queue->head;
+    char tempTargetNum[SMALL_BUFFER];
+
+    while (temp != NULL)
+    {
+        memset(tempTargetNum, 0, SMALL_BUFFER);
+        snprintf(tempTargetNum, SMALL_BUFFER, "%d", temp->target);
+
+        strcat(str, temp->action);
+        strcat(str, " ");
+        strcat(str, tempTargetNum);
+        strcpy(str, " ");
+
+        temp = temp->next;
+    }
+    return str;
+}
+
 // Example: player 1 queue att 2 att 2 att 1 att 2 att 1 endqueue stats 13 16 endstats endplayer
 char* getQueueNodeAsString(struct Player *p){
     char* str = (char*) malloc(BUFFER_SIZE);

@@ -130,4 +130,9 @@ int whoWon(struct Game *g);
  */
 char *getGameStateAsString(struct Game *g);
 
+/*
+ * returns stringified queue
+ */
+char *getQueueAsString(struct Player *p);
+
 #endif
