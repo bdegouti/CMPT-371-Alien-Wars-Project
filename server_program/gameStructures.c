@@ -23,6 +23,9 @@ void enqueueNewTask(struct PlayerQueue *pq, char *action, int target){
         perror("PlayerQueue cannot be NULL");
         return;
     }
+    if(pq->size == MAX_SIZE_OF_QUEUE){
+        return;
+    }
 
     struct Action *act = createNode(action, target);
     if (pq->head == NULL && pq->tail == NULL){
@@ -47,6 +50,7 @@ struct Action *dequeueCurrentTask(struct PlayerQueue *pq){
     if (pq->head != pq->tail){
         pq->head = pq->head->next;
         currAction->next = NULL;
+        pq->size--;
         return currAction;
     }
     else{
@@ -248,7 +252,6 @@ char *getGameStateAsString(struct Game *g){
     if (g->gameover == true){
         int winningTeam = whoWon(g);
         snprintf(str, BUFFER_SIZE, "gamestate gameover t%d endgamestate", winningTeam);
-        strcpy(str, "gamestate gameover endgamestate");
     }
     else{
         strcpy (str, "gamestate gamenotover "); 
@@ -263,3 +266,42 @@ char *getGameStateAsString(struct Game *g){
 
     return str;
 }
+
+//for testing
+
+int main(){
+    struct Game* g = initGameState();
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+    addActionToPlayer(g, 1, "att", 4);
+
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+    addActionToPlayer(g, 2, "att", 3);
+
+    for(int i = 0; i < 10; i++){
+        int *gunChecker = executeRound(g);
+        free(gunChecker);
+    }
+    char* gameString = getGameStateAsString(g);
+    printf("%s", gameString);
+
+    return 1;
+}
+

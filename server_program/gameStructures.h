@@ -5,6 +5,7 @@
 
 #define BUFFER_SIZE 8192 //size of buffer (subject to change)
 #define SMALL_BUFFER 10
+#define MAX_SIZE_OF_QUEUE 10
 #define NUM_OF_PLAYERS 4
 #define DEFAULT_GUN 0
 #define DEFAULT_HEALTH 100
