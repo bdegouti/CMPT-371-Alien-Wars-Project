@@ -11,6 +11,8 @@ const char *STATS = "stats";
 const char *END_STATS = "endstats";
 const int ACTION_LENGTH = 6;
 
+// All functions in this file are helper functions for parseServer() 
+
 bool checkGameState(char *message) {
     return !strncmp(message, GAMESTATE, strlen(GAMESTATE));
 }

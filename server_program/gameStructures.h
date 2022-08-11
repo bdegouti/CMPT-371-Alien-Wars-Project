@@ -8,6 +8,7 @@
 
 #define BUFFER_SIZE 8192 //size of buffer (subject to change)
 #define SMALL_BUFFER 10
+#define MAX_SIZE_OF_QUEUE 10
 #define NUM_OF_PLAYERS 4
 #define DEFAULT_GUN 0
 #define DEFAULT_HEALTH 100
@@ -95,9 +96,10 @@ struct Game* initGameState();
  */
 int* randomizePlayOrder();
 /*
-Executes a single round of the Game
+Executes a single round of the Game. If round has someone try to use gun while gun is locked,
+will return with array informing the server of the playernumber of that player.
 */
-void executeRound(struct Game* g);
+int* executeRound(struct Game* g);
 
 /*
  *ends game and frees used memory in self and all substructures
@@ -124,11 +126,6 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a);
  */
 int whoWon(struct Game *g);
 
-
-/*
- * returns stringified game state
- */
-char *getGameStateAsString(struct Game *g);
 
 /*
  * returns stringified queue

@@ -17,5 +17,4 @@ const char *CLEAR_CODE;
 
 char* getUserAction(struct PlayersInfo playersInfo);
 
-
 #endif

@@ -6,7 +6,6 @@ struct PlayerQueue *createPlayerQueue(){
     pq->head = NULL;
     pq->tail = NULL;
     pq->size = 0;
-    return pq;
 }
 
 // creates taskNode (used in enqueueNewTask, do not use elsewhere)
@@ -22,6 +21,9 @@ struct Action *createNode(char *action, int target){
 void enqueueNewTask(struct PlayerQueue *pq, char *action, int target){
     if (pq == NULL){
         perror("PlayerQueue cannot be NULL");
+        return;
+    }
+    if(pq->size == MAX_SIZE_OF_QUEUE){
         return;
     }
 
@@ -43,12 +45,12 @@ struct Action *dequeueCurrentTask(struct PlayerQueue *pq){
         perror("PlayerQueue cannot be NULL");
         return NULL;
     }
-
     struct Action *currAction = pq->head;
 
     if (pq->head != pq->tail){
         pq->head = pq->head->next;
         currAction->next = NULL;
+        pq->size--;
         return currAction;
     }
     else{
@@ -79,7 +81,6 @@ struct Player *createPlayer(int num){
     p->queue = createPlayerQueue();
     p->isBoostActive = false;
     p->boostCount = 0;
-    return p;
 }
 
 void deletePlayer(struct Player *p){
@@ -109,7 +110,7 @@ void endGamestate(struct Game *g){
 void addActionToPlayer(struct Game *g, int playerNum, char *action, int target){
     if (playerNum < NUM_OF_PLAYERS)
     {
-        enqueueNewTask(g->players[playerNum]->queue, action, target);
+        enqueueNewTask(g->players[playerNum-1]->queue, action, target);
     }
 }
 
@@ -131,31 +132,28 @@ int* randomizePlayOrder(){
 }
 
 //execeutes a  single round of the game
-void executeRound(struct Game* g){
+int* executeRound(struct Game* g){
+    int* gunCheck = calloc(sizeof(int), NUM_OF_PLAYERS);
     int* playOrder = randomizePlayOrder();
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         struct Action* pAction = getCurrentActionForPlayer(g, playOrder[i]);
-        applyTask(g, g->players[i], pAction);
+        if(pAction != NULL){
+            if(strcmp(pAction->action, "gun") == 0 && g->gunlocked){
+                gunCheck[playOrder[i]] = 1;
+            }
+            else{
+                applyTask(g, g->players[playOrder[i]], pAction);
+            }
+        }
     }
     free(playOrder);
+    return gunCheck;
 }
 
 // If a player's next command is "gun boost" while another player is using the gun boost. That command is being ignored.
 struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum){
-    if (playerNum < NUM_OF_PLAYERS){
-        for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            if (g->players[i]->isBoostActive == true){
-                printf("Gun boost is unavailable!\nAnother player is using it.\nAdding the next command!");
-                dequeueCurrentTask(g->players[playerNum]->queue);
-                getCurrentActionForPlayer(g, playerNum);
-            }
-            else{
-                struct Action *act = dequeueCurrentTask(g->players[playerNum]->queue);
-                return act;
-            }
-        }
-    }
-    return NULL;
+    struct Action *act = dequeueCurrentTask(g->players[playerNum]->queue);
+    return act;
 }
 
 /* Applies the task and updates the queue of the player
@@ -164,32 +162,38 @@ struct Action *getCurrentActionForPlayer(struct Game *g, int playerNum){
 */
 
 void applyTask(struct Game *g, struct Player *p, struct Action *a){
-    if (strcmp(a->action, "att") == 0){   // ANDY CLIENTTOSERVERAPI please change attack to att
-        if (p->isBoostActive){
-            g->players[a->target]->health -= 20;
-            p->boostCount--;
-            if (p->boostCount == 0){
-                p->isBoostActive = false;
+    if(p->health > 0){
+        if (strcmp(a->action, "att") == 0){   // ANDY CLIENTTOSERVERAPI please change attack to att
+            if (p->isBoostActive){
+                g->players[(a->target)-1]->health -= 20;
+                p->boostCount--;
+                if (p->boostCount == 0){
+                    p->isBoostActive = false;
+                    g->gunlocked = false;
+                }
+            }
+            else{
+                g->players[(a->target)-1]->health -= 10;
+            }
+            if (g->players[(a->target)-1]->health <= 0){
+                g->players[(a->target)-1]->health = 0;
+                if (whoWon(g) != 0){
+                    g->gameover = true;
+                }
             }
         }
-        else{
-            g->players[a->target]->health -= 10;
+        else if (strcmp(a->action, "def") == 0){ // ANDY CLIENTTOSERVERAPI please change defense to def 
+            g->players[(a->target)-1]->health += 10;
         }
-        if (g->players[a->target]->health <= 0){
-            g->players[a->target]->health = 0;
-            if (whoWon(g) != 0){
-                g->gameover = true;
+        else if (strcmp(a->action, "gun") == 0){  // ANDY CLIENTTOSERVERAPI please change boost to gun 
+            if(p->gun < MAX_GUN_FILL){
+                p->gun++;
             }
-        }
-    }
-    else if (strcmp(a->action, "def") == 0){ // ANDY CLIENTTOSERVERAPI please change defense to def 
-        p->health += 10;
-    }
-    else if (strcmp(a->action, "gun") == 0){  // ANDY CLIENTTOSERVERAPI please change boost to gun 
-        p->gun++;
-        if (p->gun == MAX_GUN_FILL){
-            p->isBoostActive = true;
-            p->boostCount = BOOST_COUNT_START;
+            if (p->gun == MAX_GUN_FILL){
+                p->isBoostActive = true;
+                p->boostCount = BOOST_COUNT_START;
+                g->gunlocked = true;
+            }
         }
     }
 }
@@ -230,11 +234,11 @@ char* getQueueNodeAsString(struct Player *p){
     char playerHealth[SMALL_BUFFER];
     char playerGun[SMALL_BUFFER];
 
-    snprintf(playerNum, SMALL_BUFFER, "%d", (p->num+1));
+    snprintf(playerNum, SMALL_BUFFER, "%d", (p->num));
     snprintf(playerHealth, SMALL_BUFFER, "%d", p->health);
     snprintf(playerGun, SMALL_BUFFER, "%d", p->gun);
 
-    strcpy (str, "gamestate gamenotover player "); 
+    strcpy (str, "player "); 
     
     strcat (str, playerNum); 
     strcat (str, " queue ");
@@ -249,36 +253,37 @@ char* getQueueNodeAsString(struct Player *p){
         strcat (str, temp->action);
         strcat (str, " ");
         strcat (str, tempTargetNum);
-        strcpy (str, " ");
+        strcat (str, " ");
 
         temp = temp->next;
     }
 
-    strcat (str, " endqueue stats ");
+    strcat (str, "endqueue stats ");
     strcat (str, playerHealth);
     strcat (str, " ");
     strcat (str, playerGun);
     strcat (str, " endstats endplayer ");
+    
     return str;
 }
 
 char *getGameStateAsString(struct Game *g){
     char* str = (char*) malloc(BUFFER_SIZE);
-    if (g->gameover == true){
-        int winningTeam = whoWon(g);
-        snprintf(str, BUFFER_SIZE, "gamestate gameover %d endgamestate", winningTeam);
-        strcpy(str, "gamestate gameover endgamestate");
+    strcpy (str, "gamestate ");
+    if(g->gameover){
+        strcat(str, "gameover ");
     }
     else{
-        strcpy (str, "gamestate gamenotover"); 
-
-        for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            char* tmp = getQueueNodeAsString(g->players[i]);
-            strcat (str, tmp);
-            free(tmp);
-        } 
-        strcat (str, " endgamestate\0");
+        strcat(str, "gamenotover ");
     }
+
+    for (int i = 0; i < NUM_OF_PLAYERS; i++){
+        char* tmp = getQueueNodeAsString(g->players[i]);
+        strcat (str, tmp);
+        free(tmp);
+    } 
+    strcat (str, "endgamestate\0");
 
     return str;
 }
+

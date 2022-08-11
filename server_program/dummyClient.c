@@ -1,4 +1,14 @@
-#include "clientBackend.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+#define SERVER_PORT "6954" //Server port number
 
 int socket_fd;
 typedef struct addrinfo* addrinfo_list;
@@ -34,8 +44,7 @@ struct addrinfo init_server_hints() {
     return server_hints;
 }
 
-// create a client socket and connect to the server
-void connectServer() {
+int main(){
     struct addrinfo server_hints = init_server_hints();
 
     int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &server_hints, &server_addrinfo_list);
@@ -53,47 +62,41 @@ void connectServer() {
         }
         break;
     }
+
+    char msg[2048];
+    memset(msg, 0, 2048);
+    int bytes = recv(socket_fd, msg, 2048, 0);
+    if(bytes > 0){
+        printf("%s", msg);
+    }
+
+    char buff[2048];
+    while(true){
+        memset(buff, 0, 2048);
+        bytes = recv(socket_fd, buff, 2048, 0);
+        if(strcmp(buff, "AllPlayersHere") == 0){
+            break;
+        }
+        else if(bytes > 0){
+            printf("%s", buff);
+        }
+    }
+
+    while(true){
+        memset(buff, 0, 2048);
+        printf("enter a message:\n");
+        scanf("%s", buff);
+        if(strcmp(buff, "exit")==0){
+            break;
+        }
+        send(socket_fd, buff, 2048, 0);
+    }
+
+    while(true){
+        memset(buff, 0, 2048);
+        bytes = recv(socket_fd, buff, 2048, 0);
+        printf("%s", buff);
+    }
     
     freeaddrinfo(server_addrinfo_list);
-}
-
-// receive players number from the server
-struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg) {
-    // using socket recv to receive "2134"
-    // 2 for the player, 1 for the ally and so on
-    //char* receivePlayerInfo = recvState();
-    struct PlayersInfo playersInfo;
-    playersInfo.player = playersInfoMsg[0];
-    playersInfo.ally = playersInfoMsg[1];
-    playersInfo.enemy1 = playersInfoMsg[2];
-    playersInfo.enemy2 = playersInfoMsg[3];
-    free(playersInfoMsg); // this is okay? (works in my machine)
-    return playersInfo;
-}
-
-// send command to the server
-void sendAction (char* ret) {
-    bytes_sent = send(socket_fd, ret, MAXBUFFERBYTES, 0);
-    
-    // send error
-    socket_error(bytes_sent, "send()");
-}
-
-// receive the game state
-char* recvState () {
-    char buffer[MAXBUFFERBYTES];
-    char *gameState = (char*)malloc(MAXBUFFERBYTES); // needs to be freed in client main!
-    bytes_received = recv(socket_fd, buffer, MAXBUFFERBYTES-1, 0);
-    
-    // recv error
-    socket_error(bytes_received, "recv()");
-    
-    strcpy(gameState, buffer);
-    memset(buffer, 0, MAXBUFFERBYTES);
-    return gameState;
-}
-
-// close socket
-void closeSocket() {
-    close(socket_fd);
 }
