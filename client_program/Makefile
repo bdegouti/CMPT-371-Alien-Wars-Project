@@ -1,10 +1,13 @@
 CC = gcc
 CFLAGS = -g -Wall -Werror
+#-lpthread
+LDFLAGS =
+OBJFILES = client.o clientBackend.o clientGUI.o clientServerParser.o clientServerAPI.o playerGameInstructions.o userAction.o
+TARGET = client
 
-all: 	client
+all: 	$(TARGET)
 		
-client: 	client.c
-				$(CC) $(CFLAGS) -o client client.c userAction.c playerGameInstructions.c clientServerAPI.c
-
+$(TARGET): 	$(OBJFILES)
+		$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES) $(LDFLAGS)
 clean:
-	$(RM) *.o client
+	$(RM) *.o $(TARGET)

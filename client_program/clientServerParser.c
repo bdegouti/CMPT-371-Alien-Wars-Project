@@ -1,5 +1,16 @@
 #include "clientServerParser.h"
 
+const char *GAMESTATE = "gamestate";
+const char *GAME_OVER = "gameover";
+const char *NOT_GAME_OVER = "notgameover";
+const char *QUEUE = "queue";
+const char *END_QUEUE = "endqueue";
+const char *PLAYER = "player";
+const char *END_PLAYER = "endplayer";
+const char *STATS = "stats";
+const char *END_STATS = "endstats";
+const int ACTION_LENGTH = 6;
+
 bool checkGameState(char *message) {
     return !strncmp(message, GAMESTATE, strlen(GAMESTATE));
 }
@@ -15,18 +26,21 @@ int getPlayerNum(char *message) {
 }
 
 void getNextAction(char *message, struct PlayerQueue *queue) {
-    char move; 
-    strncmpy(message, move, strlen(ATT));
+    char * move = (char *)malloc(strlen(ATT) + 1); 
+    strncpy(move, message, strlen(ATT));
+    move[strlen(ATT)] = '\0';
     message += strlen(ATT) + 1;
 
     int target = message[0];
     message += 2;
 
     enqueueNewTask(queue, move, target);
+    free(move);
+    move = NULL;
 }
 
 int getStats(char *message) {
-    if(message[2] = ' ') { //stat only has 2 digits
+    if(message[2] == ' ') { //stat only has 2 digits
         long digitOne = strtol(message, &message, 10);
         message++;
         long digitTwo = strtol(message, &message, 10);
@@ -59,10 +73,11 @@ struct Player *getPlayer(char * message, struct Game * game) {
 
     message += strlen(END_STATS) + 1;
     message += strlen(END_PLAYER) + 1;
+    return player;
 }
 
-struct Game parseServer(char *serverMessage, struct Game * game) {
-    if(!checkGameState(serverMessage)) return;
+struct Game * parseServer(char *serverMessage, struct Game * game) {
+    if(!checkGameState(serverMessage)) return NULL;
 
     char *message = serverMessage; //copy to a working copy
     message += strlen(GAMESTATE) + 1;
@@ -74,5 +89,7 @@ struct Game parseServer(char *serverMessage, struct Game * game) {
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
         getPlayer(message, game);
     }
-    
+    free(serverMessage);
+    serverMessage = NULL;
+    return game;
 }

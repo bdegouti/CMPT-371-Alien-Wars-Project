@@ -42,21 +42,18 @@ void sendToServer(char* userAction) {
     printf("User Action %s has been sent to server\n", userAction);
 }
 
-struct GameState getCurrentGameState() {
+struct Game * getCurrentGameState(struct Game *game) {
     // TODO Implement
     // char* gameStateMsg = recvFromServer(); 
     char* gameStateMsg = recvState(); // by Yosup
     // struct GameState currentGameState = convertGameStateMsg(gameStateMsg);
-
-    // TEMPORARY TESTING CODE
-    struct GameState currentGameState;
-    currentGameState.gameOver = true;
-    currentGameState.gameOverMsg = "test from client server api\n";
-    return currentGameState;
+    
+    game = parseServer(gameStateMsg, game);
+    return game;
 }
 
 // TODO Implement
-void displayGameState(struct GameState currentGameState) {
+void displayGameState(struct Game currentGameState) {
     printf("Future displayGameState\n");
 }
 

@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include "clientGameDataStructures.h"
+#include "../server_program/gameStructures.h"
+#include "clientServerParser.h"
 
 #include "clientBackend.h" //added by Yosup
 
@@ -18,9 +20,9 @@ struct PlayersInfo getPlayersInfo();
 
 void sendToServer(char* userAction); 
 
-struct GameState getCurrentGameState();
+struct Game * getCurrentGameState(struct Game * game);
 
-void displayGameState(struct GameState currentGameState);
+void displayGameState(struct Game currentGameState);
 
 
 #endif

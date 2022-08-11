@@ -13,6 +13,7 @@
 #include "userAction.h"
 #include "clientServerAPI.h"
 #include "clientBackend.h"
+#include "clientGUI.h"
 
 
 struct PlayersInfo startGame() {
@@ -27,15 +28,13 @@ struct Game *playGame(struct PlayersInfo playersInfo, struct Game * game) {
     while (!game->gameover) {
         char* userAction = getUserAction(playersInfo);
         sendToServer(userAction);
-        // currentGameState = getCurrentGameState();
-        // displayGameState(currentGameState);
+        getCurrentGameState(game);
+        displayGame(game, playersInfo);
 
     }
-
     return game;
 }
 
-// TODO: Needs Work - What does GameState Look Like? 
 void gameOver(struct GameState endGameState) {
     printf("%s \n", endGameState.gameOverMsg);
     
@@ -50,7 +49,6 @@ int main(int argc, char *argv[]) {
 
     print_how_to_play(playersInfo);
 
-    struct Game *endGameState = playGame(playersInfo, game); 
+    playGame(playersInfo, game); 
 
-   // gameOver(endGameState);
 }
