@@ -219,9 +219,10 @@ char *getQueueAsString(struct Player *p) {
         strcat(str, temp->action);
         strcat(str, " ");
         strcat(str, tempTargetNum);
-        strcat(str, " ");
+        strcat(str, ", ");
         temp = temp->next;
     }
+    str[strlen(str) - 2] = '\0';
     return str;
 }
 
