@@ -34,25 +34,30 @@ struct PlayersInfo getPlayersInfo() {
     playersInfo.enemy1 = '3';
     playersInfo.enemy2 = '4';
     */
-    //printf("test p1 = %c\n", playersInfoInClientBack.player);
     
+    printf("test p1 = %c\n", playersInfoInClientBack.player);
     return playersInfoInClientBack; 
 }
 
 // playGame() functions
 
 //void sendToServer(char* userAction) {
-void* sendToServer(void* ptr) {
+void* sendToServer(void* game) {
     // TODO Implement
     // sendToServer(userAction); 
 
     //below is newly implmented with thread
     //NOT IMP.: termination when the game over
+    struct Game* gameTemp = (struct Game*)game;
     while (1){
-        pthread_mutex_lock(&mutex);
-        char* userAction = getUserAction(playersInfoInClientBack);    
+        //pthread_mutex_lock(&mutex);
+        if (gameTemp->gameover){
+            printf("game over in send\n");
+            return NULL;
+        }
+        char* userAction = getUserAction(playersInfoInClientBack);
         sendAction(userAction);
-        pthread_mutex_unlock(&mutex);
+        //pthread_mutex_unlock(&mutex);
     }
 
     return NULL;
@@ -69,15 +74,22 @@ void* getCurrentGameState(void* game) {
     game = parseServer(gameStateMsg, game);
     */
 
+    struct Game* gameTemp = (struct Game*)game;
     while (1){
-        pthread_mutex_lock(&mutex);
+        //pthread_mutex_lock(&mutex);
         char* gameStateMsg = recvState();
-        game = parseServer(gameStateMsg, game);
-        //printf("\nin client = %s\n", gameStateMsg);
-        //displayGame((struct Game*) game, playersInfoInClientBack);
-        pthread_mutex_unlock(&mutex);
+        printf("in client = %s\n", gameStateMsg);
+        if (!strcmp(gameStateMsg, "gun 2")){ printf("compare\n"); gameTemp->gameover = true;}
+        if (gameTemp->gameover){printf("game over\n"); return NULL;}
+        
+        //game = parseServer(gameStateMsg, game);
+        //displayGame(gameTemp, playersInfoInClientBack);
+
+        //if (gameTemp->gameover){return NULL;}
+        //pthread_mutex_unlock(&mutex);
     }
 
 
    return NULL;
+
 }
