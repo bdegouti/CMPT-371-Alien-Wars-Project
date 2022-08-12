@@ -5,10 +5,12 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
+#include <pthread.h>
+
 #include "clientGameDataStructures.h" // IMPORTANT: Please View!
 #include "../server_program/gameStructures.h"
 #include "playerGameInstructions.h"
-#include "userAction.h"
+//#include "userAction.h" --> clientAPI.h
 #include "clientServerAPI.h"
 #include "clientBackend.h"
 #include "clientGUI.h"
@@ -19,14 +21,30 @@ struct PlayersInfo startGame() {
     return playersInfo;
 }
 
-// Multithread Me
-void playGame(struct PlayersInfo playersInfo, struct Game * game) {
+// Changed by Yosup
+// imp. Mutex
+// move this while loop to send and recv in clientServerAPI.c
+// getUserAction in sendToServer
+// displayGame in getCurrentGameState (need to be imp.)
+void playGame(struct PlayersInfo playersInfo, struct Game* game) {
+    /* before mutex
     while (!game->gameover) {
         char* userAction = getUserAction(playersInfo);
         sendToServer(userAction);
         getCurrentGameState(game);
         displayGame(game, playersInfo);
     }
+    */
+
+   // NEED TO DO:
+   // terminate when game ends
+   // send recv msg to displaygame() properly
+   pthread_t sendThread, recvThread;
+   pthread_create(&sendThread, NULL, sendToServer, NULL);
+   pthread_create(&recvThread, NULL, getCurrentGameState, (void*) game);
+   pthread_join(sendThread, NULL);
+   pthread_join(recvThread, NULL);
+   //printf("test: game over since threads in client terminated\n");
 }
 
 int main(int argc, char *argv[]) {

@@ -74,7 +74,7 @@ struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg) {
 // send command to the server
 void sendAction (char* ret) {
     bytes_sent = send(socket_fd, ret, MAXBUFFERBYTES, 0);
-    
+
     // send error
     socket_error(bytes_sent, "send()");
 }
