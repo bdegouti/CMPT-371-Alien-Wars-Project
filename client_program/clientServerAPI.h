@@ -28,7 +28,7 @@ struct PlayersInfo getPlayersInfo();
 //   keep the original for future
 //      void sendToServer(char* userAction); 
 //      struct Game * getCurrentGameState(struct Game * game);
-void* sendToServer(void* ptr);
+void* sendToServer(void* game);
 void* getCurrentGameState(void* game);
 
 #endif
