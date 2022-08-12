@@ -108,6 +108,12 @@ void sendToEachPlayer(char* msg, struct pollfd* serverSockets){
     }
 }
 
+//retrieve information from player transmission
+void interpretPlayerMessage(struct Game* g, int player, char* msg){
+    struct PlayerAction PlayerAction = getPlayerAction(player, msg);
+    addActionToPlayer(g, player, PlayerAction.action, PlayerAction.targetPlayer);
+}
+
 //sends data to users every "round"
 void* roundDataSender(void* data){
     //data be an argsToThread struct*
@@ -160,10 +166,137 @@ char* getIntroduction(int i){
     }
 }
 
-//retrieve information from player transmission
-void interpretPlayerMessage(struct Game* g, int player, char* msg){
-    struct PlayerAction PlayerAction = getPlayerAction(player, msg);
-    addActionToPlayer(g, player, PlayerAction.action, PlayerAction.targetPlayer);
+/*
+ * this function enters into a loop, waiting until all players have connected and been accepted by the server to procede
+ */
+void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets){
+    int currServerConnections = 0;
+    struct sockaddr_storage clientaddr;
+    while(currServerConnections != NUM_OF_PLAYERS) {
+        socklen_t addrlen = sizeof(clientaddr);
+        int newSocket = accept(socketfd, (struct sockaddr*)&clientaddr, &addrlen);
+        if(newSocket == -1){
+            perror("ERROR: failed to accept connection");
+        }
+        else{
+            addSocketInPoll(serverSockets, newSocket, &currServerConnections);
+
+            //message to send to player upon connecting; may not use
+
+            /*
+            memset(buffer, 0, BUFFER_SIZE);
+            snprintf(buffer, BUFFER_SIZE, "p%d\n", currServerConnections);
+            send(newSocket, buffer, strlen(buffer), 0);
+            */
+        }
+    }
+}
+
+
+/*
+ * This function runs the game, recieving messages from the clients and sending that data into
+ * the gameStructure, allowing roundDataSender to determine the server responses. the struct pollfd
+ * allows for the server to watch all four player sockets for
+ */
+void runGame(struct pollfd** serverSockets){
+    //declare thread var
+    pthread_t roundLoop;
+
+    int currServerConnections = NUM_OF_PLAYERS;
+
+    //initialize Game
+    struct Game* game = initGameState();
+    bool playerIsReady[4] = {false};
+    bool gameStarted = false;
+    bool GameNotEnded = true;
+    char buffer[BUFFER_SIZE];
+
+    //use poll to scan for events on any of the connections. Enter recieved data into game.
+    while(GameNotEnded) {
+        int numberOfEvents = poll(*serverSockets, NUM_OF_PLAYERS, -1);
+        if(numberOfEvents == -1){
+            perror("ERROR: failed at poll");
+            return;
+        }
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
+            /*
+            this if/else prevents the game from starting the round count until every player
+            has confirmed that they are ready
+            */
+            if((*serverSockets)[i].revents & POLLIN){
+                //buffer cleared
+                memset(buffer, 0, BUFFER_SIZE);
+
+                //here is where the server retrieves the message associated with the poll event
+                int inputBytes = recv((*serverSockets)[i].fd, buffer, sizeof(buffer), 0);
+
+                if(gameStarted){
+
+                    /*FOR TESTING PURPOSES*/
+                    printf("from client %d: %s\n", i+1, buffer);
+
+                    if(inputBytes <= 0){
+                        if(inputBytes == 0){
+                            printf("player %d has left", i+1);
+                        }
+                        else{
+                            perror("ERROR: failed at recv in poll loop");
+                            //todo: send exit message to clients
+                        }
+                        GameNotEnded = false;
+                        break;
+                    }
+                    //using the mutex to ensure that the game struct is accessed in a thread safe manner
+                    pthread_mutex_lock(&canAccessGameData);
+                    interpretPlayerMessage(game, i, buffer);
+                    pthread_mutex_unlock(&canAccessGameData);
+                }
+                else{
+                    if(!playerIsReady[i]){
+                        snprintf(buffer, BUFFER_SIZE, "Player %d is ready!", (i+1));
+                        sendToEachPlayer(buffer, *serverSockets);
+                    }
+
+                    playerIsReady[i] = true;
+
+                    /*FOR TESTING PURPOSES*/
+                    printf("p1: %d / p2: %d / p3: %d / p4: %d\n", playerIsReady[0], playerIsReady[1], playerIsReady[2], playerIsReady[3]);
+
+                    if(playerIsReady[0] && playerIsReady[1] && playerIsReady[2] && playerIsReady[3]){
+                        gameStarted = true;
+                        snprintf(buffer, BUFFER_SIZE, GAME_START_MESSAGE);
+                        sendToEachPlayer(buffer, *serverSockets);
+                        //creates thread that will update gamestate and send data to players every x seconds
+                        
+                        //this is the struct that passes arguments to gameLoop
+                        struct argsToThread att;
+                        att.g = game;
+                        att.socks = *serverSockets;
+                        
+                        //gameLoop thread is launched--the game has started
+                        if(pthread_create(&roundLoop, NULL, roundDataSender, &att)){
+                            perror("ERROR: failed at pthread_create");
+                            GameNotEnded = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //close all sockets
+    for(int i = 0; i < currServerConnections; i++){
+        close((*serverSockets)[i].fd);
+        deleteSocketInPoll(*serverSockets, i, &currServerConnections);
+    }
+    
+    //close thread
+    pthread_exit(&roundLoop);
+
+    endGameState(game);
+    
+    //free struct pollfd*
+    free(*serverSockets);
 }
 
 /*
@@ -202,137 +335,22 @@ int main() {
 
     
     //setup poll structure (should accept 4 player connections on top of default listener)
-    int currServerConnections = 0;
     struct pollfd* serverSockets = malloc(sizeof(struct pollfd) * NUM_OF_PLAYERS);
 
-
-    struct sockaddr_storage clientaddr;
-
-    //initialize Game
-    struct Game* game = initGameState();
-    bool playerIsReady[4] = {false};
-    bool gameStarted = false;
-    bool GameNotEnded = true;
-
     //accept connections to 4 clients before proceeding into game loop
-    while(currServerConnections != NUM_OF_PLAYERS) {
-        socklen_t addrlen = sizeof(clientaddr);
-        int newSocket = accept(socketfd, (struct sockaddr*)&clientaddr, &addrlen);
-        if(newSocket == -1){
-            perror("ERROR: failed to accept connection");
-        }
-        else{
-            addSocketInPoll(&serverSockets, newSocket, &currServerConnections);
-
-            //message to send to player upon connecting; may not use
-
-            /*
-            memset(buffer, 0, BUFFER_SIZE);
-            snprintf(buffer, BUFFER_SIZE, "p%d\n", currServerConnections);
-            send(newSocket, buffer, strlen(buffer), 0);
-            */
-        }
-    }
+    waitForAllPlayersToJoin(socketfd, &serverSockets);
+    int currServerConnections = 0;
     
     if(close(socketfd) < 0){
         perror("failed to close socket");
     } 
 
-    //tell players that all players have arrived
+    //tell players that all players have arrived, startup data (teams and enemies)
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         char* introMsg = getIntroduction(i);
         send(serverSockets[i].fd, introMsg, strlen(introMsg), 0);
     }
 
-    //declare thread var
-    pthread_t roundLoop;
-
-    //use poll to scan for events on any of the connections. Enter recieved data into game.
-    while(GameNotEnded) {
-        int numberOfEvents = poll(serverSockets, NUM_OF_PLAYERS, 50);
-        if(numberOfEvents == -1){
-            perror("ERROR: failed at poll");
-            return -1;
-        }
-        for(int i = 0; i < currServerConnections; i++){
-            /*
-            this if/else prevents the game from starting the round count until every player
-            has confirmed that they are ready
-            */
-            if(serverSockets[i].revents & POLLIN){
-                //buffer cleared
-                memset(buffer, 0, BUFFER_SIZE);
-
-                //here is where the server retrieves the message associated with the poll event
-                int inputBytes = recv(serverSockets[i].fd, buffer, sizeof(buffer), 0);
-
-                if(gameStarted){
-
-                    /*FOR TESTING PURPOSES*/
-                    printf("from client %d: %s\n", i+1, buffer);
-
-                    if(inputBytes <= 0){
-                        if(inputBytes == 0){
-                            printf("player %d has left", i+1);
-                        }
-                        else{
-                            perror("ERROR: failed at recv in poll loop");
-                            //todo: send exit message to clients
-                        }
-                        GameNotEnded = false;
-                        break;
-                    }
-                    //using the mutex to ensure that the game struct is accessed in a thread safe manner
-                    pthread_mutex_lock(&canAccessGameData);
-                    interpretPlayerMessage(game, i, buffer);
-                    pthread_mutex_unlock(&canAccessGameData);
-                }
-                else{
-
-                    if(!playerIsReady[i]){
-                        snprintf(buffer, BUFFER_SIZE, "Player %d is ready!", (i+1));
-                        sendToEachPlayer(buffer, serverSockets);
-                    }
-
-                    playerIsReady[i] = true;
-
-                    /*FOR TESTING PURPOSES*/
-                    printf("p1: %d / p2: %d / p3: %d / p4: %d\n", playerIsReady[0], playerIsReady[1], playerIsReady[2], playerIsReady[3]);
-
-                    if(playerIsReady[0] && playerIsReady[1] && playerIsReady[2] && playerIsReady[3]){
-                        gameStarted = true;
-                        snprintf(buffer, BUFFER_SIZE, GAME_START_MESSAGE);
-                        sendToEachPlayer(buffer, serverSockets);
-                        //creates thread that will update gamestate and send data to players every x seconds
-                        
-                        //this is the struct that passes arguments to gameLoop
-                        struct argsToThread att;
-                        att.g = game;
-                        att.socks = serverSockets;
-                        
-                        //gameLoop thread is launched--the game has started
-                        if(pthread_create(&roundLoop, NULL, roundDataSender, &att)){
-                            perror("ERROR: failed at pthread_create");
-                            GameNotEnded = false;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    //close all sockets
-    for(int i = 0; i < currServerConnections; i++){
-        close(serverSockets[i].fd);
-        deleteSocketInPoll(serverSockets, i, &currServerConnections);
-    }
-    
-    //close thread
-    pthread_exit(&roundLoop);
-
-    endGameState(game);
-    
-    //free struct pollfd*
-    free(serverSockets);
+    //runs the game until it reaches it's end (or a player quits)
+    runGame(&serverSockets);
 }
