@@ -10,7 +10,7 @@
 #include "gameStructures.h"
 #include "client_to_server_api.c"
 
-
+//my laptops ip address is 24.207.13.89
 #include <sys/types.h>
 #include <sys/socket.h> 
 #include <netdb.h> // getaddrinfo, gai_strerror
@@ -142,7 +142,7 @@ void* roundDataSender(void* data){
 
         pthread_mutex_unlock(&canAccessGameData);
     }
-
+    return NULL;
 }
 
 //sends gamesetup info to players (player number, teammates player number, enemy numbers)
@@ -322,7 +322,6 @@ int main() {
     int option = 1;
     setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
     exit_if_error(socketfd, "socket()");
-    char buffer[BUFFER_SIZE];
 
     // bind socket and server_addr
     for(struct addrinfo * server_addr = server_addr_list; server_addr != NULL; server_addr = server_addr->ai_next) {
@@ -344,7 +343,6 @@ int main() {
 
     //accept connections to 4 clients before proceeding into game loop
     waitForAllPlayersToJoin(socketfd, &serverSockets);
-    int currServerConnections = 0;
     
     if(close(socketfd) < 0){
         perror("failed to close socket");
