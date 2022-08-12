@@ -147,7 +147,7 @@ void* roundDataSender(void* data){
 
 //sends gamesetup info to players (player number, teammates player number, enemy numbers)
 char* getIntroduction(int i){
-    char* introMsg = (char*) malloc(SMALL_BUFFER);
+    char* introMsg = (char*) malloc(BUFFER_SIZE);
     if((i+1) == 1){
         strcpy(introMsg, "1234\0");
     }
@@ -164,6 +164,7 @@ char* getIntroduction(int i){
         perror("Error: invalid player number at getIntroduction");
         exit(-1);
     }
+    return introMsg;
 }
 
 /*
@@ -173,6 +174,7 @@ void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets){
     int currServerConnections = 0;
     struct sockaddr_storage clientaddr;
     while(currServerConnections != NUM_OF_PLAYERS) {
+        printf("waiting on clients\n");
         socklen_t addrlen = sizeof(clientaddr);
         int newSocket = accept(socketfd, (struct sockaddr*)&clientaddr, &addrlen);
         if(newSocket == -1){
@@ -180,7 +182,8 @@ void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets){
         }
         else{
             addSocketInPoll(serverSockets, newSocket, &currServerConnections);
-
+            /*FOR TESTING PURPOSES*/
+            printf("connected to client\n");
             //message to send to player upon connecting; may not use
 
             /*
@@ -229,23 +232,22 @@ void runGame(struct pollfd** serverSockets){
 
                 //here is where the server retrieves the message associated with the poll event
                 int inputBytes = recv((*serverSockets)[i].fd, buffer, sizeof(buffer), 0);
-
-                if(gameStarted){
+                if(inputBytes <= 0){
+                    if(inputBytes == 0){
+                        printf("player %d has left", i+1);
+                    }
+                    else{
+                        perror("ERROR: failed at recv in poll loop");
+                        //todo: send exit message to clients
+                    }
+                    GameNotEnded = false;
+                    break;
+                }
+                else if(gameStarted){
 
                     /*FOR TESTING PURPOSES*/
                     printf("from client %d: %s\n", i+1, buffer);
 
-                    if(inputBytes <= 0){
-                        if(inputBytes == 0){
-                            printf("player %d has left", i+1);
-                        }
-                        else{
-                            perror("ERROR: failed at recv in poll loop");
-                            //todo: send exit message to clients
-                        }
-                        GameNotEnded = false;
-                        break;
-                    }
                     //using the mutex to ensure that the game struct is accessed in a thread safe manner
                     pthread_mutex_lock(&canAccessGameData);
                     interpretPlayerMessage(game, i, buffer);
@@ -263,6 +265,10 @@ void runGame(struct pollfd** serverSockets){
                     printf("p1: %d / p2: %d / p3: %d / p4: %d\n", playerIsReady[0], playerIsReady[1], playerIsReady[2], playerIsReady[3]);
 
                     if(playerIsReady[0] && playerIsReady[1] && playerIsReady[2] && playerIsReady[3]){
+                        
+                        /*FOR TESTING PURPOSES*/
+                        printf("game is now starting!\n");
+
                         gameStarted = true;
                         snprintf(buffer, BUFFER_SIZE, GAME_START_MESSAGE);
                         sendToEachPlayer(buffer, *serverSockets);
@@ -328,14 +334,13 @@ int main() {
     }
     
     freeaddrinfo(server_addr_list);
+
+    //setup poll structure (should accept 4 player connections on top of default listener)
+    struct pollfd* serverSockets = malloc(sizeof(struct pollfd) * NUM_OF_PLAYERS);
     
     // listen()
     int listen_status = listen(socketfd, 20);
     exit_if_error(listen_status, "listen()");
-
-    
-    //setup poll structure (should accept 4 player connections on top of default listener)
-    struct pollfd* serverSockets = malloc(sizeof(struct pollfd) * NUM_OF_PLAYERS);
 
     //accept connections to 4 clients before proceeding into game loop
     waitForAllPlayersToJoin(socketfd, &serverSockets);
@@ -344,6 +349,7 @@ int main() {
     if(close(socketfd) < 0){
         perror("failed to close socket");
     } 
+
 
     //tell players that all players have arrived, startup data (teams and enemies)
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
