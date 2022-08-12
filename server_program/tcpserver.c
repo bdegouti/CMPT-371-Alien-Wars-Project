@@ -18,6 +18,7 @@
 #define BACKLOG 6
 #define SERVER_PORT "6954" //Server port number
 #define TURN_LENGTH 5 //length of turn (secs)
+#define GAME__DOESNT_DELAY_START true
 
 #define ALL_PLAYER_ARRIVED_MESSAGE  "AllPlayersHere"
 #define GAME_START_MESSAGE "GameStarted"
@@ -210,7 +211,7 @@ void runGame(struct pollfd** serverSockets){
     //initialize Game
     struct Game* game = initGameState();
     bool playerIsReady[4] = {false};
-    bool gameStarted = false;
+    bool gameStarted = GAME__DOESNT_DELAY_START;
     bool GameNotEnded = true;
     char buffer[BUFFER_SIZE];
 
