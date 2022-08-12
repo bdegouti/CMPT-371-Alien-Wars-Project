@@ -12,6 +12,8 @@
 const char * ATT;
 const char * DEF;
 const char * GUN;
+const char *THEME_CODES[5];
+const char *CLEAR_CODE;
 
 char* getUserAction(struct PlayersInfo playersInfo);
 
