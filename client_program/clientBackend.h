@@ -12,7 +12,8 @@
 
 #include "clientGameDataStructures.h"
 
-#define SERVER_PORT "6969"
+#define SERVER_ADDR "24.207.13.89"
+#define SERVER_PORT "6954"
 #define MAXBUFFERBYTES 100
 
 // return boolean when error

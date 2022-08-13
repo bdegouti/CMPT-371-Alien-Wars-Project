@@ -1,10 +1,13 @@
 #include "clientServerAPI.h"
 
+struct PlayersInfo playersInfoInClientBack;
+pthread_mutex_t  mutex = PTHREAD_MUTEX_INITIALIZER;
+
 // startGame() functions
 
 void connectToServer() {
     // TODO: connectToServer 
-    connectServer(); // by Yosup
+    connectServer();
     printf("connected to server\n");
 }
 
@@ -14,41 +17,79 @@ struct PlayersInfo getPlayersInfo() {
     // send in the order of player, ally, enemy 1 and 2
     // for example, 2, 1, 3, 4; if the player is assigned 2
 
-    
-    // char* playersInfoMsg = recvState();
+    char* playersInfoMsg = recvState();
+    playersInfoInClientBack.player = playersInfoMsg[0];
+    playersInfoInClientBack.ally = playersInfoMsg[1];
+    playersInfoInClientBack.enemy1 = playersInfoMsg[2];
+    playersInfoInClientBack.enemy2 = playersInfoMsg[3];
     // struct PlayersInfo playersInfo = convertPlayersInfoMsg(playersInfoMsg); 
     //UNCOMMENT ABOVE LINE AFTER TESTING ^^^^^^^^^^^^^^^^^^^^^^^^^^
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     // TEMPORARY TESTING CODE 
+    /*
     struct PlayersInfo playersInfo;
     playersInfo.player = '1';
     playersInfo.ally   = '2';
     playersInfo.enemy1 = '3';
     playersInfo.enemy2 = '4';
+    */
     
-    
-    // by Yosup
-    // by Yosup
-    // by Yosup
-    return playersInfo; 
+    printf("test p1 = %c\n", playersInfoInClientBack.player);
+    return playersInfoInClientBack; 
 }
 
 // playGame() functions
 
-void sendToServer(char* userAction) {
+//void sendToServer(char* userAction) {
+void* sendToServer(void* game) {
     // TODO Implement
     // sendToServer(userAction); 
-    sendAction(userAction); // by Yosup
-    printf("User Action %s has been sent to server\n", userAction);
+
+    //below is newly implmented with thread
+    //NOT IMP.: termination when the game over
+    struct Game* gameTemp = (struct Game*)game;
+    while (1){
+        //pthread_mutex_lock(&mutex);
+        if (gameTemp->gameover){
+            printf("game over in send\n");
+            return NULL;
+        }
+        char* userAction = getUserAction(playersInfoInClientBack);
+        sendAction(userAction);
+        //pthread_mutex_unlock(&mutex);
+    }
+
+    return NULL;
 }
 
-struct Game * getCurrentGameState(struct Game *game) {
+void* getCurrentGameState(void* game) {
+
     // TODO Implement
     // char* gameStateMsg = recvFromServer(); 
-    char* gameStateMsg = recvState(); // by Yosup
-    // struct GameState currentGameState = convertGameStateMsg(gameStateMsg);
     
+    /* before mutex imp.
+    char* gameStateMsg = recvState();
+    // struct GameState currentGameState = convertGameStateMsg(gameStateMsg);
     game = parseServer(gameStateMsg, game);
-    return game;
+    */
+
+    struct Game* gameTemp = (struct Game*)game;
+    while (1){
+        //pthread_mutex_lock(&mutex);
+        char* gameStateMsg = recvState();
+        printf("in client = %s\n", gameStateMsg);
+        if (!strcmp(gameStateMsg, "gun 2")){ printf("compare\n"); gameTemp->gameover = true;}
+        if (gameTemp->gameover){printf("game over\n"); return NULL;}
+        
+        //game = parseServer(gameStateMsg, game);
+        //displayGame(gameTemp, playersInfoInClientBack);
+
+        //if (gameTemp->gameover){return NULL;}
+        //pthread_mutex_unlock(&mutex);
+    }
+
+
+   return NULL;
+
 }

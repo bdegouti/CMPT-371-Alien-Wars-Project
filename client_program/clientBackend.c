@@ -38,7 +38,10 @@ struct addrinfo init_server_hints() {
 void connectServer() {
     struct addrinfo server_hints = init_server_hints();
 
-    int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &server_hints, &server_addrinfo_list);
+    //int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &server_hints, &server_addrinfo_list);
+    // test connecting
+    int getaddrinfo_status = getaddrinfo(SERVER_ADDR, SERVER_PORT, &server_hints, &server_addrinfo_list);
+    //24.207.13.89
     exit_socket_error(getaddrinfo_status, "getaddrinfo()");
     
     // Setup Socket to Server Application
@@ -73,8 +76,8 @@ struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg) {
 
 // send command to the server
 void sendAction (char* ret) {
-    bytes_sent = send(socket_fd, ret, MAXBUFFERBYTES, 0);
-    
+    bytes_sent = send(socket_fd, ret, 6, 0);
+
     // send error
     socket_error(bytes_sent, "send()");
 }

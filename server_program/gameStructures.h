@@ -1,6 +1,5 @@
-#ifndef GAME_STRUCTURES_H
-#define GAME_STRUCTURES_H
-
+#ifndef gameStructures_h
+#define gameStructures_h
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -69,8 +68,10 @@ struct Action* dequeueCurrentTask(struct PlayerQueue* pq);
 /*
  * return the list as a string which can be sent to client
  */
-char* getListAsString(struct PlayerQueue* pq);
 
+char* getQueueNodeAsString(struct Player *p);
+
+char* getQueueAsString(struct Player *p);
 /*
  * Delete PlayerQueue and release memory
  */
@@ -128,8 +129,7 @@ int whoWon(struct Game *g);
 
 
 /*
- * returns stringified queue
+ * returns stringified game state
  */
-char *getQueueAsString(struct Player *p);
-
+char *getGameStateAsString(struct Game *g);
 #endif
