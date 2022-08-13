@@ -59,5 +59,7 @@ int main(int argc, char *argv[]) {
     
     printf("test: game over since threads in client terminated\n");
 
+    endGameState(game);
+
     return 0;
 }
