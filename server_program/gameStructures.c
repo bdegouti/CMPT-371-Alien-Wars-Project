@@ -101,7 +101,7 @@ struct Game *initGameState(){
     return gameState;
 }
 
-void endGamestate(struct Game *g){
+void endGameState(struct Game *g){
     for (int i = 0; i < NUM_OF_PLAYERS; i++){
         deletePlayer(g->players[i]);
     }
