@@ -266,7 +266,7 @@ void runGame(struct pollfd** serverSockets){
 
                     //using the mutex to ensure that the game struct is accessed in a thread safe manner
                     pthread_mutex_lock(&canAccessGameData);
-                    interpretPlayerMessage(game, i, buffer);
+                    interpretPlayerMessage(game, i+1, buffer);
                     pthread_mutex_unlock(&canAccessGameData);
                 }
                 else{
