@@ -217,6 +217,17 @@ void runGame(struct pollfd** serverSockets){
 
     //use poll to scan for events on any of the connections. Enter recieved data into game.
     while(GameNotEnded) {
+        if(GAME__DOESNT_DELAY_START){
+            struct argsToThread att;
+            att.g = game;
+            att.socks = *serverSockets;
+            
+            if(pthread_create(&roundLoop, NULL, roundDataSender, &att)){
+                perror("ERROR: failed at pthread_create");
+                GameNotEnded = false;
+                break;
+            }
+        }
         int numberOfEvents = poll(*serverSockets, NUM_OF_PLAYERS, -1);
         if(numberOfEvents == -1){
             perror("ERROR: failed at poll");
