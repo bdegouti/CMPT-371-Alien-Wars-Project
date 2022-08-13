@@ -6,6 +6,7 @@ struct PlayerQueue *createPlayerQueue(){
     pq->head = NULL;
     pq->tail = NULL;
     pq->size = 0;
+    return pq;
 }
 
 // creates taskNode (used in enqueueNewTask, do not use elsewhere)
@@ -81,6 +82,7 @@ struct Player *createPlayer(int num){
     p->queue = createPlayerQueue();
     p->isBoostActive = false;
     p->boostCount = 0;
+    return p;
 }
 
 void deletePlayer(struct Player *p){
