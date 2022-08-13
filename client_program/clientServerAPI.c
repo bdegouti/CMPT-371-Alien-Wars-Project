@@ -75,7 +75,7 @@ void* getCurrentGameState(void* game) {
     */
 
     struct Game* gameTemp = (struct Game*)game;
-    while (0){
+    while (1){
     //while (1){
         //pthread_mutex_lock(&mutex);
         char* gameStateMsg = recvState();
