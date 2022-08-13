@@ -2,7 +2,7 @@
 
 struct PlayersInfo playersInfoInClientBack;
 pthread_mutex_t  mutex = PTHREAD_MUTEX_INITIALIZER;
-
+char* gameStateMsg;
 // startGame() functions
 
 void connectToServer() {
@@ -41,55 +41,40 @@ struct PlayersInfo getPlayersInfo() {
 
 // playGame() functions
 
-//void sendToServer(char* userAction) {
 void* sendToServer(void* game) {
-    // TODO Implement
-    // sendToServer(userAction); 
-
-    //below is newly implmented with thread
-    //NOT IMP.: termination when the game over
     struct Game* gameTemp = (struct Game*)game;
     while (1){
-        //pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
         if (gameTemp->gameover){
             printf("game over in send\n");
             return NULL;
         }
         char* userAction = getUserAction(playersInfoInClientBack);
         sendAction(userAction);
-        //pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
+        sleep(1);
     }
 
     return NULL;
 }
 
 void* getCurrentGameState(void* game) {
-
-    // TODO Implement
-    // char* gameStateMsg = recvFromServer(); 
-    
-    /* before mutex imp.
-    char* gameStateMsg = recvState();
-    // struct GameState currentGameState = convertGameStateMsg(gameStateMsg);
-    game = parseServer(gameStateMsg, game);
-    */
-
     struct Game* gameTemp = (struct Game*)game;
+    
     while (1){
-    //while (1){
-        //pthread_mutex_lock(&mutex);
-        char* gameStateMsg = recvState();
+        pthread_mutex_lock(&mutex);
+        gameStateMsg = recvState();
 
         // testing purpose
         //printf("in client = %s\n", gameStateMsg);
-        //if (!strcmp(gameStateMsg, "gun 2")){ printf("compare\n"); gameTemp->gameover = true;}
-        //if (gameTemp->gameover){printf("game over\n"); return NULL;}
         
         game = parseServer(gameStateMsg, game);
         displayGame(gameTemp, playersInfoInClientBack);
         if (gameTemp->gameover){printf("test: gameover in recv\n"); return NULL;}
         
-        //pthread_mutex_unlock(&mutex);
+        memset(gameStateMsg, 0, strlen(gameStateMsg));
+        pthread_mutex_unlock(&mutex);
+        sleep(1);
     }
 
 
