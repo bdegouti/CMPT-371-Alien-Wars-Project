@@ -2,10 +2,11 @@
 
 int socket_fd;
 typedef struct addrinfo* addrinfo_list;
-//char buffer[MAXBUFFERBYTES];
+char buffer[MAXBUFFERBYTES];
 addrinfo_list server_addrinfo_list;
 ssize_t bytes_sent;
 int bytes_received;
+
 
 // return boolean when error
 bool socket_error(int status, char* error_message) {
@@ -36,6 +37,7 @@ struct addrinfo init_server_hints() {
 
 // create a client socket and connect to the server
 void connectServer() {
+    
     struct addrinfo server_hints = init_server_hints();
 
     //int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &server_hints, &server_addrinfo_list);
@@ -58,42 +60,69 @@ void connectServer() {
     }
     
     freeaddrinfo(server_addrinfo_list);
-}
+    
+   /*
+    printf("before connection\n");
+    struct sockaddr_in servaddr;
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    //servaddr.sin_addr.s_addr = inet_addr("192.168.250.1/24");
+    
+    servaddr.sin_addr.s_addr = inet_addr("174.7.36.77");
+    servaddr.sin_port = htons(8080);
 
-// receive players number from the server
-struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg) {
-    // using socket recv to receive "2134"
-    // 2 for the player, 1 for the ally and so on
-    //char* receivePlayerInfo = recvState();
-    struct PlayersInfo playersInfo;
-    playersInfo.player = playersInfoMsg[0];
-    playersInfo.ally = playersInfoMsg[1];
-    playersInfo.enemy1 = playersInfoMsg[2];
-    playersInfo.enemy2 = playersInfoMsg[3];
-    free(playersInfoMsg); // this is okay? (works in my machine)
-    return playersInfo;
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(connect(socket_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0){
+        printf("connection with server failed");
+        exit(0);
+    }
+    printf("after connection\n");
+    */
+   /*
+    struct sockaddr_in servaddr;
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    //servaddr.sin_addr.s_addr = inet_addr("192.168.250.2");
+    //172.20.10.4
+    servaddr.sin_addr.s_addr = inet_addr("172.20.10.4");
+    servaddr.sin_port = htons(6954);
+    
+    printf("test before socket\n");
+
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(socket_error(socket_fd, "socket()")){
+        printf("socket failed");
+        exit(-1);
+    }
+    
+    printf("test before connect\n");
+    
+    int connect_error = connect(socket_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    if(socket_error(connect_error, "connect()")){
+        printf("connection with server failed");
+        exit(-1);
+    }
+    printf("connect done\n");
+    */
 }
 
 // send command to the server
 void sendAction (char* ret) {
     bytes_sent = send(socket_fd, ret, 6, 0);
 
-    // send error
+    // send error handle
     socket_error(bytes_sent, "send()");
 }
 
 // receive the game state
 char* recvState () {
-    char buffer[MAXBUFFERBYTES];
-    char *gameState = (char*)malloc(MAXBUFFERBYTES); // needs to be freed in client main!
+    memset(buffer, 0, MAXBUFFERBYTES);
     bytes_received = recv(socket_fd, buffer, MAXBUFFERBYTES-1, 0);
     
-    // recv error
+    // recv error handle
     socket_error(bytes_received, "recv()");
-    
-    strcpy(gameState, buffer);
-    memset(buffer, 0, MAXBUFFERBYTES);
-    return gameState;
+
+    return buffer;
 }
 
 // close socket
