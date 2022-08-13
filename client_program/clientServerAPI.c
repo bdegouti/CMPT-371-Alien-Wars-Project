@@ -35,7 +35,7 @@ struct PlayersInfo getPlayersInfo() {
     playersInfo.enemy2 = '4';
     */
     
-    printf("test p1 = %c\n", playersInfoInClientBack.player);
+    printf("received player info = %s\n", playersInfoMsg);
     return playersInfoInClientBack; 
 }
 
@@ -75,17 +75,20 @@ void* getCurrentGameState(void* game) {
     */
 
     struct Game* gameTemp = (struct Game*)game;
-    while (1){
+    while (0){
+    //while (1){
         //pthread_mutex_lock(&mutex);
         char* gameStateMsg = recvState();
-        printf("in client = %s\n", gameStateMsg);
-        if (!strcmp(gameStateMsg, "gun 2")){ printf("compare\n"); gameTemp->gameover = true;}
-        if (gameTemp->gameover){printf("game over\n"); return NULL;}
-        
-        //game = parseServer(gameStateMsg, game);
-        //displayGame(gameTemp, playersInfoInClientBack);
 
-        //if (gameTemp->gameover){return NULL;}
+        // testing purpose
+        //printf("in client = %s\n", gameStateMsg);
+        //if (!strcmp(gameStateMsg, "gun 2")){ printf("compare\n"); gameTemp->gameover = true;}
+        //if (gameTemp->gameover){printf("game over\n"); return NULL;}
+        
+        game = parseServer(gameStateMsg, game);
+        displayGame(gameTemp, playersInfoInClientBack);
+        if (gameTemp->gameover){printf("test: gameover in recv\n"); return NULL;}
+        
         //pthread_mutex_unlock(&mutex);
     }
 
