@@ -7,10 +7,6 @@ const char *GUI_ENEMY_TEAM = "\t\t\tEnemy Team\n";
 const char *GUI_WIN = "Your team wins!!\n";
 const char *GUI_LOSE = "Your team lost ._.\n";
 
-const char *ATT = "att";
-const char *DEF = "def";
-const char *GUN = "gun";
-
 void displayGame(struct Game *game, struct PlayersInfo info) {
     if(!game->gameover) {
         printf("%s%s", GUI_INTRO, GUI_YOUR_TEAM);
