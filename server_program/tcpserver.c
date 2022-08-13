@@ -7,16 +7,20 @@
 #include <stdbool.h>
 #include <poll.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h> 
+#include <netinet/in.h>
+#include <netdb.h> // getaddrinfo, gai_strerror
+
 #include "gameStructures.h"
 #include "client_to_server_api.c"
 
 //my laptops ip address is 24.207.13.89
-#include <sys/types.h>
-#include <sys/socket.h> 
-#include <netdb.h> // getaddrinfo, gai_strerror
 
 #define BACKLOG 6
-#define SERVER_PORT "6954" //Server port number
+#define SERVER_PORT "8080" //Server port number
+#define SERVER_PORT_AS_INT 8080
+#define SERVER_ADDR "24.207.13.89"
 #define TURN_LENGTH 5 //length of turn (secs)
 #define GAME__DOESNT_DELAY_START true
 
@@ -56,11 +60,12 @@ struct addrinfo init_server_hints() {
     return server_hints;
 }
 
+
 struct addrinfo * init_server_addr_list() {
     struct addrinfo hints = init_server_hints();
     struct addrinfo * server_addr_list;
 
-    int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &hints, &server_addr_list);
+    int getaddrinfo_status = getaddrinfo(SERVER_ADDR, SERVER_PORT, &hints, &server_addr_list);
     exit_if_error(getaddrinfo_status, "getaddrinfo()");
 
     return server_addr_list;
@@ -92,7 +97,6 @@ void moveStrToHeap(char** str){
 /*
 ---------------------------------------------------------------------
 THE FUNCTIONS BELOW ARE RELATED TO SENDING OR RECEIVING DATA FROM CLIENTS
-WE NEED CONCRETE IDEA OF WHAT MESSAGES WILL LOOK LIKE TO IMPLEMENT
 ---------------------------------------------------------------------
 */
 
@@ -171,13 +175,13 @@ char* getIntroduction(int i){
 /*
  * this function enters into a loop, waiting until all players have connected and been accepted by the server to procede
  */
-void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets){
+void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets, struct sockaddr_in* serv_addr){
     int currServerConnections = 0;
-    struct sockaddr_storage clientaddr;
+    //struct sockaddr_storage clientaddr;
     while(currServerConnections != NUM_OF_PLAYERS) {
         printf("waiting on clients\n");
-        socklen_t addrlen = sizeof(clientaddr);
-        int newSocket = accept(socketfd, (struct sockaddr*)&clientaddr, &addrlen);
+        socklen_t addrlen = sizeof(*serv_addr);
+        int newSocket = accept(socketfd, (struct sockaddr*)serv_addr, &addrlen);
         if(newSocket == -1){
             perror("ERROR: failed to accept connection");
         }
@@ -221,7 +225,7 @@ void runGame(struct pollfd** serverSockets){
             struct argsToThread att;
             att.g = game;
             att.socks = *serverSockets;
-            
+
             if(pthread_create(&roundLoop, NULL, roundDataSender, &att)){
                 perror("ERROR: failed at pthread_create");
                 GameNotEnded = false;
@@ -327,34 +331,47 @@ void runGame(struct pollfd** serverSockets){
 int main() {
     pthread_mutex_init(&canAccessGameData, NULL);
     // server_addr_list 
-    struct addrinfo * server_addr_list = init_server_addr_list();
-
+    
+    //struct addrinfo * server_addr_list = init_server_addr_list(); //TEMP DISABLED
+    
+    //TEMP ADDED
+    struct sockaddr_in serv_addr;
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_port = htons(SERVER_PORT_AS_INT);
     // socket 
-    int socketfd = socket(PF_INET, SOCK_STREAM, 0);
+    int socketfd = socket(AF_INET, SOCK_STREAM, 0);
     int option = 1;
     setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
     exit_if_error(socketfd, "socket()");
 
     // bind socket and server_addr
-    for(struct addrinfo * server_addr = server_addr_list; server_addr != NULL; server_addr = server_addr->ai_next) {
+    /*for(struct addrinfo * server_addr = server_addr_list; server_addr != NULL; server_addr = server_addr->ai_next) {
         int bind_status = bind(socketfd, server_addr->ai_addr, server_addr->ai_addrlen);
         if (is_socket_error(bind_status, "bind()")) {
             exit(-1);
         }
         break; // if we get here, we must have connected successfully
+    } //TEMP DISABLED*/
+
+    //TEMP ADDED
+    int bind_status = bind(socketfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    if (is_socket_error(bind_status, "bind()")) {
+        exit(-1);
     }
     
-    freeaddrinfo(server_addr_list);
+    //freeaddrinfo(server_addr_list); //TEMP DISABLED
 
     //setup poll structure (should accept 4 player connections on top of default listener)
     struct pollfd* serverSockets = malloc(sizeof(struct pollfd) * NUM_OF_PLAYERS);
     
     // listen()
-    int listen_status = listen(socketfd, 20);
+    int listen_status = listen(socketfd, 4);
     exit_if_error(listen_status, "listen()");
 
     //accept connections to 4 clients before proceeding into game loop
-    waitForAllPlayersToJoin(socketfd, &serverSockets);
+    waitForAllPlayersToJoin(socketfd, &serverSockets, &serv_addr);
     
     if(close(socketfd) < 0){
         perror("failed to close socket");

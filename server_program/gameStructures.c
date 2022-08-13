@@ -185,7 +185,9 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a){
             }
         }
         else if (strcmp(a->action, "def") == 0){ // ANDY CLIENTTOSERVERAPI please change defense to def 
-            g->players[(a->target)-1]->health += 10;
+            if(g->players[(a->target)-1]->health < 100){
+                g->players[(a->target)-1]->health += 10;
+            }
         }
         else if (strcmp(a->action, "gun") == 0){  // ANDY CLIENTTOSERVERAPI please change boost to gun 
             if(p->gun < MAX_GUN_FILL){
@@ -208,7 +210,7 @@ int whoWon(struct Game *g){
     } else return 0; // Game not over.
 }
 
-char *getQueueAsString(struct Player *p) {
+char* getQueueAsString(struct Player *p) {
     char *str = (char *)malloc(BUFFER_SIZE);
     struct Action *temp = p->queue->head;
     char tempTargetNum[SMALL_BUFFER];
