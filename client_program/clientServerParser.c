@@ -47,7 +47,7 @@ int getStats(char *message) {
         message++;
         long digitTwo = strtol(message, &message, 10);
         message += 2;
-        return (int) (digitOne * 10) + digitTwo;
+        return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
     } else {
         long digitZero = 100;
         message++;
@@ -81,28 +81,30 @@ struct Player *getPlayer(char * message, struct Game * game) {
 void updateGame (char * message, struct Game * game) {
     int playerNum;
     for (int i = 0; i < NUM_OF_PLAYERS; i++) {
-        playerNum = getPlayerNum(message);
-        struct Player* player=createPlayer(playerNum);
+        playerNum = i;
 
         message += strlen(PLAYER) + 1;
         message += 2; //slide pointer to start of queue
         message += strlen(QUEUE) + 1;
         while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
-            getNextAction(message, player->queue);
+            getNextAction(message, game->players[playerNum]->queue);
         } 
         message += strlen(END_QUEUE) + 1;
         message += strlen(STATS) + 1;
-        message += 6;
 
-        player->health = getStats(message);
-        player->gun = getStats(message);
+        game->players[playerNum]->health = getStats(message);
+        game->players[playerNum]->gun = getStats(message);
 
+        if (game->players[playerNum]->health == 100) {
+            message += 6;    
+        }
+        else {
+            message += 5;
+        }
         message += strlen(END_STATS) + 1;
         message += strlen(END_PLAYER) + 1;
 
-        printf("chopped = %s\n",message);
-
-        game->players[playerNum] = player;
+        //printf("chopped = %s\n",message);
     }
 }
 
@@ -116,11 +118,12 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     
-    //updateGame
+    //updateGame(message, game);
 
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
         getPlayer(message, game);
     }
+
     free(serverMessage);
     serverMessage = NULL;
     return game;
