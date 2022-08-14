@@ -110,7 +110,7 @@ void endGameState(struct Game *g){
 }
 
 void addActionToPlayer(struct Game *g, int playerNum, char *action, int target){
-    if (playerNum < NUM_OF_PLAYERS)
+    if (playerNum <= NUM_OF_PLAYERS)
     {
         enqueueNewTask(g->players[playerNum-1]->queue, action, target);
     }
