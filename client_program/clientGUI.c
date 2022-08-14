@@ -1,6 +1,6 @@
 #include "clientGUI.h"
 
-const char *GUI_INTRO = "\033[32m************************\033[34mGAME STATS\033[32m**********************************\033[0m\n";
+const char *GUI_INTRO = "\n\033[32m************************\033[34mGAME STATS\033[32m**********************************\033[0m\n";
 const char *GUI_YOUR_TEAM = "\t\t\t\033[32mYour Team\033[0m\n";
 const char *GUI_ENEMY_TEAM = "\t\t\t\033[31mEnemy Team\033[0m\n";
 const char *GUI_OUTRO = "\033[32m********************************************************************\033[0m\n";
