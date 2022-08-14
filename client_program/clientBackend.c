@@ -2,7 +2,7 @@
 
 int socket_fd;
 typedef struct addrinfo* addrinfo_list;
-//char buffer[MAXBUFFERBYTES];
+char buffer[BUFFER_SIZE];
 addrinfo_list server_addrinfo_list;
 ssize_t bytes_sent;
 int bytes_received;
@@ -35,13 +35,12 @@ struct addrinfo init_server_hints() {
 }
 
 // create a client socket and connect to the server
+// commented out for other "struct" version (below)
+// both works
+/*
 void connectServer() {
     struct addrinfo server_hints = init_server_hints();
-
-    //int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &server_hints, &server_addrinfo_list);
-    // test connecting
     int getaddrinfo_status = getaddrinfo(SERVER_ADDR, SERVER_PORT, &server_hints, &server_addrinfo_list);
-    //24.207.13.89
     exit_socket_error(getaddrinfo_status, "getaddrinfo()");
     
     // Setup Socket to Server Application
@@ -59,40 +58,49 @@ void connectServer() {
     
     freeaddrinfo(server_addrinfo_list);
 }
+*/
 
-// receive players number from the server
-struct PlayersInfo convertPlayersInfoMsg (char* playersInfoMsg) {
-    // using socket recv to receive "2134"
-    // 2 for the player, 1 for the ally and so on
-    //char* receivePlayerInfo = recvState();
-    struct PlayersInfo playersInfo;
-    playersInfo.player = playersInfoMsg[0];
-    playersInfo.ally = playersInfoMsg[1];
-    playersInfo.enemy1 = playersInfoMsg[2];
-    playersInfo.enemy2 = playersInfoMsg[3];
-    free(playersInfoMsg); // this is okay? (works in my machine)
-    return playersInfo;
+// it uses sockaddr_in structure
+void connectServer() {
+    struct sockaddr_in servaddr;
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
+    servaddr.sin_port = htons(SERVER_PORT_AS_INT);
+
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(socket_error(socket_fd, "socket()")){
+        printf("socket failed");
+        exit(-1);
+    }
+    
+    int connect_error = connect(socket_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    if(socket_error(connect_error, "connect()")){
+        printf("connection with server failed");
+        exit(-1);
+    }
 }
 
 // send command to the server
 void sendAction (char* ret) {
+    // since the format is ex) att 3
     bytes_sent = send(socket_fd, ret, 6, 0);
 
-    // send error
+    // send error handle
     socket_error(bytes_sent, "send()");
 }
 
 // receive the game state
 char* recvState () {
-    char buffer[MAXBUFFERBYTES];
-    char *gameState = (char*)malloc(MAXBUFFERBYTES); // needs to be freed in client main!
-    bytes_received = recv(socket_fd, buffer, MAXBUFFERBYTES-1, 0);
+    char *gameState = (char*)malloc(BUFFER_SIZE); // freed in serverAPI
+    bytes_received = recv(socket_fd, buffer, sizeof(buffer), 0);
     
-    // recv error
+    // recv error handle
     socket_error(bytes_received, "recv()");
-    
+
     strcpy(gameState, buffer);
-    memset(buffer, 0, MAXBUFFERBYTES);
+    memset(buffer, 0, BUFFER_SIZE);
+
     return gameState;
 }
 

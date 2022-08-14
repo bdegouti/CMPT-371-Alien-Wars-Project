@@ -47,7 +47,7 @@ int getStats(char *message) {
         message++;
         long digitTwo = strtol(message, &message, 10);
         message += 2;
-        return (int) (digitOne * 10) + digitTwo;
+        return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
     } else {
         long digitZero = 100;
         message++;
@@ -78,8 +78,42 @@ struct Player *getPlayer(char * message, struct Game * game) {
     return player;
 }
 
+void updateGame (char * message, struct Game * game) {
+    int playerNum;
+    for (int i = 0; i < NUM_OF_PLAYERS; i++) {
+        playerNum = i;
+
+        message += strlen(PLAYER) + 1;
+        message += 2; //slide pointer to start of queue
+        message += strlen(QUEUE) + 1;
+        while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
+            getNextAction(message, game->players[playerNum]->queue);
+        } 
+        message += strlen(END_QUEUE) + 1;
+        message += strlen(STATS) + 1;
+
+        game->players[playerNum]->health = getStats(message);
+        game->players[playerNum]->gun = getStats(message);
+
+        if (game->players[playerNum]->health == 100) {
+            message += 6;    
+        }
+        else {
+            message += 5;
+        }
+        message += strlen(END_STATS) + 1;
+        message += strlen(END_PLAYER) + 1;
+
+        //printf("chopped = %s\n",message);
+    }
+}
+
 struct Game * parseServer(char *serverMessage, struct Game * game) {
-    if(!checkGameState(serverMessage)) return NULL;
+    if(!checkGameState(serverMessage)){
+        //gameover
+        game->gameover = true;
+        return game;
+    }
 
     char *message = serverMessage; //copy to a working copy
     message += strlen(GAMESTATE) + 1;
@@ -88,6 +122,7 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     
+    //updateGame(message, game);
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
         getPlayer(message, game);
     }
