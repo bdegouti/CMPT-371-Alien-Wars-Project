@@ -42,7 +42,10 @@ void getNextAction(char *message, struct PlayerQueue *queue) {
 }
 
 int getStats(char *message) {
-    if(message[2] == ' ') { //stat only has 2 digits
+    printf("message 0 = %c\n", message[0]);
+    printf("message 1 = %c\n", message[1]);
+    printf("message 2 = %c\n", message[2]);
+    if(message[1] == ' ') { //stat only has 2 digits
         long digitOne = strtol(message, &message, 10);
         message++;
         long digitTwo = strtol(message, &message, 10);
@@ -50,11 +53,12 @@ int getStats(char *message) {
         //return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
         return (int) (digitOne) + digitTwo; 
     }
-    else if(message[3] == ' ') { //stat only has 1 digits
+    if(message[2] == ' ') { //stat only has 2 digits
         long digitOne = strtol(message, &message, 10);
         message++;
         long digitTwo = strtol(message, &message, 10);
         message += 2;
+        //return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
         return (int) (digitOne) + digitTwo; 
     }
     else {
