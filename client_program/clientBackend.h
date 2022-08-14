@@ -10,14 +10,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-//#include<arpa/inet.h> // for "socklen_t" struct: inet_addr()
+#include<arpa/inet.h> // for "socklen_t" struct: inet_addr()
 
 #include "clientGameDataStructures.h"
 
 #define SERVER_PORT "8080" //Server port number
 #define SERVER_PORT_AS_INT 8080 // for "socklen_t" struct
-#define SERVER_ADDR "24.207.13.89" // server address
-//#define SERVER_ADDR "127.0.0.1" // test for localhost
+//#define SERVER_ADDR "24.207.13.89" // server address
+#define SERVER_ADDR "127.0.0.1" // test for localhost
 #define BUFFER_SIZE 8192 // to be changed if server change the size
 
 // return boolean when error
