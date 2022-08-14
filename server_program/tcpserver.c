@@ -20,7 +20,7 @@
 #define BACKLOG 6
 #define SERVER_PORT "8080" //Server port number
 #define SERVER_PORT_AS_INT 8080
-#define SERVER_ADDR "24.207.13.89"
+#define SERVER_ADDR "24.207.13.89" //not used in current setup
 #define TURN_LENGTH 5 //length of turn (secs)
 #define GAME__DOESNT_DELAY_START true
 
@@ -55,7 +55,7 @@ struct addrinfo init_server_hints() {
     struct addrinfo server_hints;
     memset(&server_hints, 0, sizeof server_hints);
     server_hints.ai_family = AF_INET;
-    server_hints.ai_socktype = SOCK_STREAM;
+    server_hints.ai_socktype = SOCK_STREAM; // TCP
     server_hints.ai_flags = AI_PASSIVE; // pass NULL to nodename
     return server_hints;
 }
@@ -65,7 +65,7 @@ struct addrinfo * init_server_addr_list() {
     struct addrinfo hints = init_server_hints();
     struct addrinfo * server_addr_list;
 
-    int getaddrinfo_status = getaddrinfo(SERVER_ADDR, SERVER_PORT, &hints, &server_addr_list);
+    int getaddrinfo_status = getaddrinfo(NULL, SERVER_PORT, &hints, &server_addr_list);
     exit_if_error(getaddrinfo_status, "getaddrinfo()");
 
     return server_addr_list;
@@ -175,13 +175,13 @@ char* getIntroduction(int i){
 /*
  * this function enters into a loop, waiting until all players have connected and been accepted by the server to procede
  */
-void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets, struct sockaddr_in* serv_addr){
+void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets){
     int currServerConnections = 0;
-    //struct sockaddr_storage clientaddr;
+    struct sockaddr_storage clientaddr;
     while(currServerConnections != NUM_OF_PLAYERS) {
         printf("waiting on clients\n");
-        socklen_t addrlen = sizeof(*serv_addr);
-        int newSocket = accept(socketfd, (struct sockaddr*)serv_addr, &addrlen);
+        socklen_t addrlen = sizeof(clientaddr);
+        int newSocket = accept(socketfd, (struct sockaddr*)&clientaddr, &addrlen);
         if(newSocket == -1){
             perror("ERROR: failed to accept connection");
         }
@@ -332,14 +332,14 @@ int main() {
     pthread_mutex_init(&canAccessGameData, NULL);
     // server_addr_list 
     
-    //struct addrinfo * server_addr_list = init_server_addr_list(); //TEMP DISABLED
+    struct addrinfo * server_addr_list = init_server_addr_list();
     
     //TEMP ADDED
-    struct sockaddr_in serv_addr;
+    /*struct sockaddr_in serv_addr;
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(SERVER_PORT_AS_INT);
+    serv_addr.sin_port = htons(SERVER_PORT_AS_INT);*/
     // socket 
     int socketfd = socket(AF_INET, SOCK_STREAM, 0);
     int option = 1;
@@ -347,21 +347,21 @@ int main() {
     exit_if_error(socketfd, "socket()");
 
     // bind socket and server_addr
-    /*for(struct addrinfo * server_addr = server_addr_list; server_addr != NULL; server_addr = server_addr->ai_next) {
+    for(struct addrinfo * server_addr = server_addr_list; server_addr != NULL; server_addr = server_addr->ai_next) {
         int bind_status = bind(socketfd, server_addr->ai_addr, server_addr->ai_addrlen);
         if (is_socket_error(bind_status, "bind()")) {
             exit(-1);
         }
         break; // if we get here, we must have connected successfully
-    } //TEMP DISABLED*/
+    }
 
     //TEMP ADDED
-    int bind_status = bind(socketfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    /*int bind_status = bind(socketfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (is_socket_error(bind_status, "bind()")) {
         exit(-1);
-    }
+    }*/
     
-    //freeaddrinfo(server_addr_list); //TEMP DISABLED
+    freeaddrinfo(server_addr_list); //TEMP DISABLED
 
     //setup poll structure (should accept 4 player connections on top of default listener)
     struct pollfd* serverSockets = malloc(sizeof(struct pollfd) * NUM_OF_PLAYERS);
@@ -371,7 +371,7 @@ int main() {
     exit_if_error(listen_status, "listen()");
 
     //accept connections to 4 clients before proceeding into game loop
-    waitForAllPlayersToJoin(socketfd, &serverSockets, &serv_addr);
+    waitForAllPlayersToJoin(socketfd, &serverSockets);
     
     if(close(socketfd) < 0){
         perror("failed to close socket");
