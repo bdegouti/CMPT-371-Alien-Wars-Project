@@ -49,7 +49,15 @@ int getStats(char *message) {
         message += 2;
         //return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
         return (int) (digitOne) + digitTwo; 
-    } else {
+    }
+    else if(message[3] == ' ') { //stat only has 1 digits
+        long digitOne = strtol(message, &message, 10);
+        message++;
+        long digitTwo = strtol(message, &message, 10);
+        message += 2;
+        return (int) (digitOne) + digitTwo; 
+    }
+    else {
         long digitZero = 100;
         message++;
         long digitOne = strtol(message, &message, 10);
@@ -83,11 +91,11 @@ void updateGame (char * message, struct Game * game) {
     int playerNum;
     for (int i = 0; i < NUM_OF_PLAYERS; i++) {
         playerNum = i;
-        //printf("chopped 1 = %s\n\n",message);
+        printf("chopped 1 = %s\n\n",message);
         message += strlen(PLAYER) + 1;
         message += 2; //slide pointer to start of queue
         message += strlen(QUEUE) + 1;
-        //printf("chopped 2 = %s\n\n",message);
+        printf("chopped 2 = %s\n\n",message);
         while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
             //getNextAction(message, game->players[playerNum]->queue);
             message += strlen(ATT) + 1;
@@ -96,7 +104,7 @@ void updateGame (char * message, struct Game * game) {
         message += strlen(END_QUEUE) + 1;
         message += strlen(STATS) + 1;
 
-        //printf("chopped 3 = %s\n\n",message);
+        printf("chopped 3 = %s\n\n",message);
 
         game->players[playerNum]->health = getStats(message);
         game->players[playerNum]->gun = getStats(message);
@@ -104,13 +112,16 @@ void updateGame (char * message, struct Game * game) {
         if (game->players[playerNum]->health == 100) {
             message += 6;    
         }
-        else {
+        else if (game->players[playerNum]->health < 100 && game->players[playerNum]->health > 0) {
             message += 5;
+        }
+        else {
+            message += 4;
         }
         message += strlen(END_STATS) + 1;
         message += strlen(END_PLAYER) + 1;
 
-        //printf("chopped end = %s\n\n",message);
+        printf("chopped end = %s\n\n",message);
     }
 }
 
