@@ -109,7 +109,11 @@ void updateGame (char * message, struct Game * game) {
 }
 
 struct Game * parseServer(char *serverMessage, struct Game * game) {
-    if(!checkGameState(serverMessage)) return NULL;
+    if(!checkGameState(serverMessage)){
+        //gameover
+        game->gameover = true;
+        return game;
+    }
 
     char *message = serverMessage; //copy to a working copy
     message += strlen(GAMESTATE) + 1;
@@ -119,11 +123,9 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     
     //updateGame(message, game);
-
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
         getPlayer(message, game);
     }
-
     free(serverMessage);
     serverMessage = NULL;
     return game;
