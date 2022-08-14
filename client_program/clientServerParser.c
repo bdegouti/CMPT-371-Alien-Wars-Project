@@ -78,6 +78,34 @@ struct Player *getPlayer(char * message, struct Game * game) {
     return player;
 }
 
+void updateGame (char * message, struct Game * game) {
+    int playerNum;
+    for (int i = 0; i < NUM_OF_PLAYERS; i++) {
+        playerNum = getPlayerNum(message);
+        struct Player* player=createPlayer(playerNum);
+
+        message += strlen(PLAYER) + 1;
+        message += 2; //slide pointer to start of queue
+        message += strlen(QUEUE) + 1;
+        while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
+            getNextAction(message, player->queue);
+        } 
+        message += strlen(END_QUEUE) + 1;
+        message += strlen(STATS) + 1;
+        message += 6;
+
+        player->health = getStats(message);
+        player->gun = getStats(message);
+
+        message += strlen(END_STATS) + 1;
+        message += strlen(END_PLAYER) + 1;
+
+        printf("chopped = %s\n",message);
+
+        game->players[playerNum] = player;
+    }
+}
+
 struct Game * parseServer(char *serverMessage, struct Game * game) {
     if(!checkGameState(serverMessage)) return NULL;
 
@@ -88,6 +116,8 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     
+    //updateGame
+
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
         getPlayer(message, game);
     }
