@@ -128,6 +128,7 @@ void* roundDataSender(void* data){
 
     //socks is a shared element, but should be threadsafe (relevant data is not changed)
     struct pollfd* socks = att->socks;
+    int roundNum = 0;
     while(true){
         //pauses for length of turn
         sleep(TURN_LENGTH);
@@ -135,6 +136,8 @@ void* roundDataSender(void* data){
         
         //executes round of game
         executeRound(game);
+        printf("round %d\n", roundNum);
+        roundNum++;
 
         //gets gameState as string
         char* gameState = getGameStateAsString(game);
@@ -214,19 +217,19 @@ void runGame(struct pollfd** serverSockets){
     bool GameNotEnded = true;
     char buffer[BUFFER_SIZE];
 
+    if(GAME__DOESNT_DELAY_START){
+        struct argsToThread att;
+        att.g = game;
+        att.socks = *serverSockets;
+
+        if(pthread_create(&roundLoop, NULL, roundDataSender, &att)){
+            perror("ERROR: failed at pthread_create");
+            exit(-1);
+        }
+    }
+
     //use poll to scan for events on any of the connections. Enter recieved data into game.
     while(GameNotEnded) {
-        if(GAME__DOESNT_DELAY_START){
-            struct argsToThread att;
-            att.g = game;
-            att.socks = *serverSockets;
-
-            if(pthread_create(&roundLoop, NULL, roundDataSender, &att)){
-                perror("ERROR: failed at pthread_create");
-                GameNotEnded = false;
-                break;
-            }
-        }
         int numberOfEvents = poll(*serverSockets, NUM_OF_PLAYERS, -1);
         if(numberOfEvents == -1){
             perror("ERROR: failed at poll");
