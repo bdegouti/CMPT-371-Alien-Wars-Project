@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
 
     playGame(playersInfo, game); 
     
+    closeSocket();
     printf("test: game over since threads in client terminated\n");
 
     return 0;
