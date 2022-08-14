@@ -183,7 +183,7 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a){
             }
         }
         else if (strcmp(a->action, "gun") == 0){  // ANDY CLIENTTOSERVERAPI please change boost to gun 
-            if(g->gunlocked != false){
+            if(g->gunlocked == false){
                 if(p->gun < MAX_GUN_FILL){
                     p->gun++;
                 }
