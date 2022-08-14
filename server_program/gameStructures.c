@@ -211,10 +211,11 @@ int whoWon(struct Game *g){
 }
 
 char* getQueueAsString(struct Player *p) {
-    char *str = (char *)malloc(BUFFER_SIZE);
+    char *str = (char *)malloc(p->queue->size * 8);
     struct Action *temp = p->queue->head;
     char tempTargetNum[SMALL_BUFFER];
 
+    strcpy(str, "");
     while (temp != NULL)
     {
         memset(tempTargetNum, 0, SMALL_BUFFER);
