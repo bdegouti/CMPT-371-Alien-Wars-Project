@@ -83,15 +83,20 @@ void updateGame (char * message, struct Game * game) {
     int playerNum;
     for (int i = 0; i < NUM_OF_PLAYERS; i++) {
         playerNum = i;
-
+        //printf("chopped 1 = %s\n\n",message);
         message += strlen(PLAYER) + 1;
         message += 2; //slide pointer to start of queue
         message += strlen(QUEUE) + 1;
+        //printf("chopped 2 = %s\n\n",message);
         while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
-            getNextAction(message, game->players[playerNum]->queue);
+            //getNextAction(message, game->players[playerNum]->queue);
+            message += strlen(ATT) + 1;
+            message += 2;
         } 
         message += strlen(END_QUEUE) + 1;
         message += strlen(STATS) + 1;
+
+        //printf("chopped 3 = %s\n\n",message);
 
         game->players[playerNum]->health = getStats(message);
         game->players[playerNum]->gun = getStats(message);
@@ -105,7 +110,7 @@ void updateGame (char * message, struct Game * game) {
         message += strlen(END_STATS) + 1;
         message += strlen(END_PLAYER) + 1;
 
-        //printf("chopped = %s\n",message);
+        //printf("chopped end = %s\n\n",message);
     }
 }
 
@@ -122,7 +127,7 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     bool gameOver = checkGameState(message);
     game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
-    
+    //printf("msg in paser = %s\n", message);
     updateGame(message, game);
     /*
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
