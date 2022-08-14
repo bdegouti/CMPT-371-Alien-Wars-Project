@@ -9,6 +9,15 @@
 
 #include "clientGameDataStructures.h"
 
+// enum for console colors
+enum theme
+{
+    white,
+    red,
+    blue,
+    green
+};
+
 const char * ATT;
 const char * DEF;
 const char * GUN;

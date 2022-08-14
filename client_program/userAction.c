@@ -4,15 +4,6 @@ const char *ATT = "att";
 const char *DEF = "def";
 const char *GUN = "gun";
 
-// enum for console colors
-enum theme
-{
-    white,
-    red,
-    blue,
-    green
-};
-
 // theme codes for console colors
 const char *THEME_CODES[5] = {"\033[37m",
                               "\033[31m",
