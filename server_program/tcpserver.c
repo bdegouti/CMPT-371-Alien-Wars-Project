@@ -114,7 +114,9 @@ void sendToEachPlayer(char* msg, struct pollfd* serverSockets){
     }
 }
 
-//retrieve information from player transmission
+/*
+ *retrieve information from player transmission
+ */
 void interpretPlayerMessage(struct Game* g, int player, char* msg){
     struct PlayerAction PlayerAction = getPlayerAction(player, msg);
     addActionToPlayer(g, player, PlayerAction.action, PlayerAction.targetPlayer);
@@ -154,7 +156,9 @@ void* roundDataSender(void* data){
     return NULL;
 }
 
-//sends gamesetup info to players (player number, teammates player number, enemy numbers)
+/*
+ *sends gamesetup info to players (player number, teammates player number, enemy numbers)
+ */
 char* getIntroduction(int i){
     char* introMsg = (char*) malloc(BUFFER_SIZE);
     if((i+1) == 1){
@@ -217,6 +221,7 @@ void runGame(struct pollfd** serverSockets){
     bool GameNotEnded = true;
     char buffer[BUFFER_SIZE];
 
+    //if the game is not delaying for all players to confirm readiness, start immediately
     if(GAME__DOESNT_DELAY_START){
         struct argsToThread att;
         att.g = game;
