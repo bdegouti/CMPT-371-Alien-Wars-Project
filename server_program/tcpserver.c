@@ -11,6 +11,7 @@
 #include <sys/socket.h> 
 #include <netinet/in.h>
 #include <netdb.h> // getaddrinfo, gai_strerror
+#include <signal.h>
 
 #include "gameStructures.h"
 #include "client_to_server_api.c"
@@ -19,7 +20,7 @@
 
 #define BACKLOG 6
 #define SERVER_PORT "8080" //Server port number
-#define SERVER_PORT_AS_INT 8080
+#define SERVER_PORT_AS_INT 8080 // not used in currrent setup
 #define SERVER_ADDR "24.207.13.89" //not used in current setup
 #define TURN_LENGTH 5 //length of turn (secs)
 #define GAME__DOESNT_DELAY_START true
@@ -187,15 +188,9 @@ void waitForAllPlayersToJoin(int socketfd, struct pollfd** serverSockets){
         }
         else{
             addSocketInPoll(serverSockets, newSocket, &currServerConnections);
+            
             /*FOR TESTING PURPOSES*/
             printf("connected to client\n");
-            //message to send to player upon connecting; may not use
-
-            /*
-            memset(buffer, 0, BUFFER_SIZE);
-            snprintf(buffer, BUFFER_SIZE, "p%d\n", currServerConnections);
-            send(newSocket, buffer, strlen(buffer), 0);
-            */
         }
     }
 }
@@ -240,7 +235,7 @@ void runGame(struct pollfd** serverSockets){
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
             /*
             this if/else prevents the game from starting the round count until every player
-            has confirmed that they are ready
+            has confirmed that they are ready unless GAME_DOESNT_DELAY_START
             */
             if((*serverSockets)[i].revents & POLLIN){
                 //buffer cleared
@@ -331,15 +326,8 @@ void runGame(struct pollfd** serverSockets){
 int main() {
     pthread_mutex_init(&canAccessGameData, NULL);
     // server_addr_list 
-    
     struct addrinfo * server_addr_list = init_server_addr_list();
-    
-    //TEMP ADDED
-    /*struct sockaddr_in serv_addr;
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(SERVER_PORT_AS_INT);*/
+
     // socket 
     int socketfd = socket(AF_INET, SOCK_STREAM, 0);
     int option = 1;
@@ -354,12 +342,6 @@ int main() {
         }
         break; // if we get here, we must have connected successfully
     }
-
-    //TEMP ADDED
-    /*int bind_status = bind(socketfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
-    if (is_socket_error(bind_status, "bind()")) {
-        exit(-1);
-    }*/
     
     freeaddrinfo(server_addr_list); //TEMP DISABLED
 
