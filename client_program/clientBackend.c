@@ -35,9 +35,6 @@ struct addrinfo init_server_hints() {
 }
 
 // create a client socket and connect to the server
-// commented out for other "struct" version (below)
-// both works
-/*
 void connectServer() {
     struct addrinfo server_hints = init_server_hints();
     int getaddrinfo_status = getaddrinfo(SERVER_ADDR, SERVER_PORT, &server_hints, &server_addrinfo_list);
@@ -58,28 +55,7 @@ void connectServer() {
     
     freeaddrinfo(server_addrinfo_list);
 }
-*/
 
-// it uses sockaddr_in structure
-void connectServer() {
-    struct sockaddr_in servaddr;
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
-    servaddr.sin_port = htons(SERVER_PORT_AS_INT);
-
-    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if(socket_error(socket_fd, "socket()")){
-        printf("socket failed");
-        exit(-1);
-    }
-    
-    int connect_error = connect(socket_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
-    if(socket_error(connect_error, "connect()")){
-        printf("connection with server failed");
-        exit(-1);
-    }
-}
 
 // send command to the server
 void sendAction (char* ret) {
