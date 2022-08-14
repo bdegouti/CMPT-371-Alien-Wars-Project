@@ -33,6 +33,13 @@ and then sends the text to a converter which creates game objects for the reciev
 For example, a gamestate is converted from various objects which hold gamestate data such as player queues into a single string,
 which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects. 
 
+## Opening Sockets 
+See client_program/clientBackend.c
+See server_program/tcpserver.c
+
+## Handling Shared Object
+See server_program/gameStructures.c function applyTask()
+
 ## Group Members and their % contribution
 Ben de Goutiere - 20%  
 Kerem Sarisen - 20%  
