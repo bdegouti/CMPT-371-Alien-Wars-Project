@@ -13,7 +13,6 @@
 #include "clientGUI.h"
 
 void connectToServer();
-
 struct PlayersInfo getPlayersInfo();
 
 void* sendToServer(void* game);
