@@ -134,22 +134,15 @@ int* randomizePlayOrder(){
 }
 
 //execeutes a  single round of the game
-int* executeRound(struct Game* g){
-    int* gunCheck = calloc(sizeof(int), NUM_OF_PLAYERS);
+void executeRound(struct Game* g){
     int* playOrder = randomizePlayOrder();
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         struct Action* pAction = getCurrentActionForPlayer(g, playOrder[i]);
         if(pAction != NULL){
-            if(strcmp(pAction->action, "gun") == 0 && g->gunlocked){
-                gunCheck[playOrder[i]] = 1;
-            }
-            else{
-                applyTask(g, g->players[playOrder[i]], pAction);
-            }
+            applyTask(g, g->players[playOrder[i]], pAction);
         }
     }
     free(playOrder);
-    return gunCheck;
 }
 
 // If a player's next command is "gun boost" while another player is using the gun boost. That command is being ignored.
@@ -190,13 +183,18 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a){
             }
         }
         else if (strcmp(a->action, "gun") == 0){  // ANDY CLIENTTOSERVERAPI please change boost to gun 
-            if(p->gun < MAX_GUN_FILL){
-                p->gun++;
-            }
-            if (p->gun == MAX_GUN_FILL){
-                p->isBoostActive = true;
-                p->boostCount = BOOST_COUNT_START;
-                g->gunlocked = true;
+            if(g->gunlocked != false){
+                if(p->gun < MAX_GUN_FILL){
+                    p->gun++;
+                }
+                if (p->gun == MAX_GUN_FILL){
+                    for(int i = 0; i < NUM_OF_PLAYERS; i++){
+                        g->players[i]->gun = 0;
+                    }
+                    p->isBoostActive = true;
+                    p->boostCount = BOOST_COUNT_START;
+                    g->gunlocked = true;
+                }
             }
         }
     }

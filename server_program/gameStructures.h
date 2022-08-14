@@ -100,7 +100,7 @@ int* randomizePlayOrder();
 Executes a single round of the Game. If round has someone try to use gun while gun is locked,
 will return with array informing the server of the playernumber of that player.
 */
-int* executeRound(struct Game* g);
+void executeRound(struct Game* g);
 
 /*
  *ends game and frees used memory in self and all substructures

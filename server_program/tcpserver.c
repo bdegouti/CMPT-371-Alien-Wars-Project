@@ -343,7 +343,7 @@ int main() {
         break; // if we get here, we must have connected successfully
     }
     
-    freeaddrinfo(server_addr_list); //TEMP DISABLED
+    freeaddrinfo(server_addr_list);
 
     //setup poll structure (should accept 4 player connections on top of default listener)
     struct pollfd* serverSockets = malloc(sizeof(struct pollfd) * NUM_OF_PLAYERS);
@@ -364,8 +364,10 @@ int main() {
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         char* introMsg = getIntroduction(i);
         send(serverSockets[i].fd, introMsg, strlen(introMsg), 0);
+        free(introMsg);
     }
 
     //runs the game until it reaches it's end (or a player quits)
     runGame(&serverSockets);
+    printf("end");
 }
