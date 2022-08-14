@@ -20,15 +20,6 @@ struct PlayersInfo startGame() {
 }
 
 void playGame(struct PlayersInfo playersInfo, struct Game* game) {
-//void playGame(struct PlayersInfo playersInfo) {
-    /* before mutex
-    while (!game->gameover) {
-        char* userAction = getUserAction(playersInfo);
-        sendToServer(userAction);
-        getCurrentGameState(game);
-        displayGame(game, playersInfo);
-    }
-    */
    pthread_t sendThread, recvThread;
 
    pthread_create(&sendThread, NULL, sendToServer, (void*) game);
