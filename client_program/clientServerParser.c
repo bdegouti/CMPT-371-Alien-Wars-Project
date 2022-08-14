@@ -47,7 +47,8 @@ int getStats(char *message) {
         message++;
         long digitTwo = strtol(message, &message, 10);
         message += 2;
-        return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
+        //return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
+        return (int) (digitOne) + digitTwo; 
     } else {
         long digitZero = 100;
         message++;
@@ -122,10 +123,12 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     
-    //updateGame(message, game);
+    updateGame(message, game);
+    /*
     for(int i = 0; i < NUM_OF_PLAYERS; i++) {
         getPlayer(message, game);
     }
+    */
     free(serverMessage);
     serverMessage = NULL;
     return game;

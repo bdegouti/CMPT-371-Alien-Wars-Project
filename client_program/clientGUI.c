@@ -10,19 +10,19 @@ const char *GUI_LOSE = "\033[31mYour team lost ._.\033[0m\n";
 
 void displayGame(struct Game *game, struct PlayersInfo info) {
     printf("%s%s", GUI_INTRO, GUI_YOUR_TEAM);
-    printf("Your health:%s\t%d\t\t\t\t%sAlly health:%s\t%d%s\n", THEME_CODES[green], game->players[info.player - 1]->health, CLEAR_CODE, THEME_CODES[green], game->players[info.ally - 1]->health, CLEAR_CODE);
-    printf("Your gun:\t%s%d\t\t\t\t%sAlly gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.player - 1]->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.ally - 1]->gun, CLEAR_CODE);
+    printf("Your health:%s\t%d\t\t\t\t%sAlly health:%s\t%d%s\n", THEME_CODES[green], game->players[info.player -'1']->health, CLEAR_CODE, THEME_CODES[green], game->players[info.ally -'1']->health, CLEAR_CODE);
+    printf("Your gun:\t%s%d\t\t\t\t%sAlly gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.player -'1']->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.ally -'1']->gun, CLEAR_CODE);
     
-    char *playerQueue = getQueueAsString(game->players[info.player - 1]);
-    char *allyQueue = getQueueAsString(game->players[info.ally - 1]);
-    char *enemy1Queue = getQueueAsString(game->players[info.enemy1 - 1]);
-    char *enemy2Queue = getQueueAsString(game->players[info.enemy2 - 1]);
+    char *playerQueue = getQueueAsString(game->players[info.player -'1']);
+    char *allyQueue = getQueueAsString(game->players[info.ally -'1']);
+    char *enemy1Queue = getQueueAsString(game->players[info.enemy1 -'1']);
+    char *enemy2Queue = getQueueAsString(game->players[info.enemy2 -'1']);
 
     printf("Your queue:\033[33m\t%s%s\n", playerQueue, CLEAR_CODE);
     printf("Ally queue:\033[33m\t%s%s\n\n", allyQueue, CLEAR_CODE);
     printf("%s", GUI_ENEMY_TEAM);
-    printf("Enemy 1 health:%s\t%d\t\t\t\t%sEnemy 2 health:\t%s%d%s\n", THEME_CODES[green], game->players[info.enemy1 - 1]->health, CLEAR_CODE, THEME_CODES[green], game->players[info.enemy2 - 1]->health, CLEAR_CODE);
-    printf("Enemy 1 gun:%s\t%d\t\t\t\t%sEnemy 2 gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.enemy1 - 1]->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.enemy2 - 1]->gun, CLEAR_CODE);
+    printf("Enemy 1 health:%s\t%d\t\t\t\t%sEnemy 2 health:\t%s%d%s\n", THEME_CODES[green], game->players[info.enemy1 -'1']->health, CLEAR_CODE, THEME_CODES[green], game->players[info.enemy2 -'1']->health, CLEAR_CODE);
+    printf("Enemy 1 gun:%s\t%d\t\t\t\t%sEnemy 2 gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.enemy1 -'1']->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.enemy2 -'1']->gun, CLEAR_CODE);
     printf("Enemy 1 queue:\033[33m\t%s%s\n", enemy1Queue, CLEAR_CODE);
     printf("Enemy 2 queue:\033[33m\t%s%s\n", enemy2Queue, CLEAR_CODE);
 
@@ -35,7 +35,7 @@ void displayGame(struct Game *game, struct PlayersInfo info) {
     if (game->gameover)
     {
         int winner = whoWon(game);
-        if (winner == 1 && (info.player == 1 || info.ally == 1))
+        if (winner == '1' && (info.player == '1' || info.ally == '1'))
         { // win
             printf("%s", GUI_WIN);
         }
@@ -45,7 +45,8 @@ void displayGame(struct Game *game, struct PlayersInfo info) {
         }
         return;
     }
-    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    printf("\n\n\n");
+    //printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 }
 
 
