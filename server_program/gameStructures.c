@@ -209,7 +209,15 @@ int whoWon(struct Game *g){
 }
 
 char* getQueueAsString(struct Player *p) {
-    char *str = (char *)malloc(p->queue->size * 8);
+    char * str;
+    if(p->queue->size == 0) {
+        str = (char *) malloc(2);
+        str[0] = ' ';
+        str[1] = '\0';
+        return str;
+    } 
+    str = (char *)malloc(p->queue->size * 8);
+    
     struct Action *temp = p->queue->head;
     char tempTargetNum[SMALL_BUFFER];
 
