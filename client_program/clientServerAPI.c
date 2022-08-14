@@ -35,19 +35,22 @@ struct PlayersInfo getPlayersInfo() {
 
 void* sendToServer(void* game) {
     struct Game* gameTemp = (struct Game*)game;
+
     while (1){
-        if (gameTemp->gameover){
-            printf("game over in send\n");
-            return NULL;
-        }
+
         char* userAction = getUserAction(playersInfoInClientBack);
         
         // mutex send may not be necessary???
-        //pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
         sendAction(userAction);
-        //pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
         //sleep(1);
-        
+
+        if (gameTemp->gameover){
+            printf("game over in send\n");
+            free(userAction);
+            return NULL;
+        }        
         free(userAction); // free malloc from user input (ret)
     }
 
@@ -59,30 +62,26 @@ void* getCurrentGameState(void* game) {
 
     while (1){
         char* gameStateMsg = recvState();
-        
-        // test: print the msg from the server
-        // uncomment below code snippet
-        // comment above gameTemp declar
-        // comment the code snippet (line 70- before free(gameStateMsg))
-        /*
-        pthread_mutex_lock(&mutex);
-        printf("in client = %s\n", gameStateMsg);
-        pthread_mutex_unlock(&mutex);
-        */
+        //printf("in client = %s\n", gameStateMsg);
 
-        // if error cuz right after connection
-        // displayGame function need to be modified
         pthread_mutex_lock(&mutex);
-        game = parseServer(recvState(), game);
+
+        gameTemp = parseServer(gameStateMsg, gameTemp);
         displayGame(gameTemp, playersInfoInClientBack);
-        if (gameTemp->gameover){printf("test: gameover in recv\n"); return NULL;}
+        
         pthread_mutex_unlock(&mutex);
+
+
+        if (gameTemp->gameover){
+            printf("test: gameover in recv\n");
+            free(gameStateMsg);
+            return NULL;
+        }
         //sleep(1);
-
-        free(gameStateMsg);
     }
-
 
    return NULL;
 
 }
+
+
