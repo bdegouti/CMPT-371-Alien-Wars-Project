@@ -45,15 +45,15 @@ int getStats(char *message) {
     printf("message 0 = %c\n", message[0]);
     printf("message 1 = %c\n", message[1]);
     printf("message 2 = %c\n", message[2]);
-    if(message[1] == ' ') { //stat only has 2 digits
+    if(message[0] == ' ') { //stat only has 1 digits
         long digitOne = strtol(message, &message, 10);
         message++;
-        long digitTwo = strtol(message, &message, 10);
-        message += 2;
+        //long digitTwo = strtol(message, &message, 10);
+        //message += 2;
         //return (int) (digitOne * 10) + digitTwo; //this returns 900 instead 90??
-        return (int) (digitOne) + digitTwo; 
+        return (int) (digitOne);// + digitTwo; 
     }
-    if(message[2] == ' ') { //stat only has 2 digits
+    else if(message[2] == ' ') { //stat only has 2 digits
         long digitOne = strtol(message, &message, 10);
         message++;
         long digitTwo = strtol(message, &message, 10);
@@ -111,19 +111,34 @@ void updateGame (char * message, struct Game * game) {
         printf("chopped 3 = %s\n\n",message);
 
         game->players[playerNum]->health = getStats(message);
-        game->players[playerNum]->gun = getStats(message);
-
-        if (game->players[playerNum]->health == 100) {
-            message += 6;    
+        if(message[0] == ' ') { //stat only has 1 digits
+            message += 1;
         }
-        else if (game->players[playerNum]->health < 100 && game->players[playerNum]->health > 0) {
-            message += 5;
+        else if(message[2] == ' ') { //stat only has 2 digits
+            message += 2;
         }
         else {
-            message += 4;
+            message += 3;
         }
+        //message++;
+
+
+        game->players[playerNum]->gun = getStats(message);
+        //game->players[playerNum]->gun = message[0];
+
+        if(message[0] == ' ') { //stat only has 1 digits
+            message += 1;
+        }
+        else if(message[2] == ' ') { //stat only has 2 digits
+            message += 2;
+        }
+        else {
+            message += 3;
+        }
+        message++;
+        message++;
         message += strlen(END_STATS) + 1;
-        message += strlen(END_PLAYER) + 1;
+        message += strlen(END_PLAYER) +1;
 
         printf("chopped end = %s\n\n",message);
     }
