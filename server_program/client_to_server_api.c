@@ -37,32 +37,3 @@ struct PlayerAction getPlayerAction(int clientSocketId, char * clientActionMsg) 
 
     return playerAction;
 }
-
-// This function is for testing
-void print_PlayerAction(struct PlayerAction playerAction) {
-    printf("%d ", playerAction.player);
-    printf("%s ", playerAction.action);
-    printf("%d \n", playerAction.targetPlayer);
-}
-
-
-// This main function is for testing
-/*
-int main () {
-
-    // This will be called inside a socket listen, and be passed to gamelogic. 
-    struct PlayerAction pa1 = getPlayerAction(2, "att 3"); 
-    struct PlayerAction pa2 = getPlayerAction(2, "def 1"); 
-    struct PlayerAction pa3 = getPlayerAction(3, "gun"); 
-    struct PlayerAction pa4 = getPlayerAction(3, "att 2"); 
-    struct PlayerAction pa5 = getPlayerAction(1, "def 1"); 
-
-    print_PlayerAction(pa1);
-    print_PlayerAction(pa2);
-    print_PlayerAction(pa3);
-    print_PlayerAction(pa4);
-    print_PlayerAction(pa5);
-
-    return 0;
-}
-*/
