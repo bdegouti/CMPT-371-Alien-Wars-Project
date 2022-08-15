@@ -237,7 +237,8 @@ struct Game * parseServer(char *serverMessage, struct Game * game) {
     printf("original copy %s \n\n", message);
     message += strlen(GAMESTATE) + 1;
     
-    bool gameOver = checkGameState(message);
+    bool gameOver = getGameState(message);
+    printf("\nGameOver?: %s\n", gameOver ? "true" : "false");
     game->gameover = gameOver;
     message += gameOver ? strlen(GAME_OVER) + 1 : strlen(NOT_GAME_OVER) + 1;
     //printf("msg in paser = %s\n", message);
