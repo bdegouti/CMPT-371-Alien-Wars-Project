@@ -136,7 +136,7 @@ void executeRound(struct Game* g){
     for(int i = 0; i < NUM_OF_PLAYERS; i++){
         struct Action* pAction = getCurrentActionForPlayer(g, playOrder[i]);
         if(pAction != NULL){
-            applyTask(g, g->players[(pAction->target)-1], pAction);
+            applyTask(g, g->players[playOrder[i]], pAction);
         }
     }
     free(playOrder);
