@@ -53,3 +53,4 @@ void* getCurrentGameState(void* game) {
 
    return NULL;
 }
+
