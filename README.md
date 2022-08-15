@@ -1,5 +1,7 @@
 # CMPT 371 Alien Wars Project  
 
+Codebase - https://github.com/bdegouti/CMPT-371-Alien-Wars-Project 
+
 ## Project Proposal: Alien Wars
 Alien Wars is a 2 v 2 real time strategy game. The goal of the game is for your team to kill the other team. 
 
