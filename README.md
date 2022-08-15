@@ -63,8 +63,8 @@ See server_program/tcpserver.c
 See server_program/gameStructures.c function applyTask()
 
 ## Group Members and their % contribution
-Ben de Goutiere - 20%  
-Kerem Sarisen - 20%  
-Mike Ostrowka - 20%  
-Andy Wang - 20%  
-Yosup Cheon - 20%  
+Ben de Goutiere - 20% (Server Frontend, GameLogic)
+Kerem Sarisen - 20%   (Game Logic)
+Mike Ostrowka - 20%   (Client Frontend, Client Backend)
+Andy Wang - 20%       (Socket setup)
+Yosup Cheon - 20%     (Client Frontend, Client Backend)
