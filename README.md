@@ -31,7 +31,29 @@ When a client recieves a game over gamestate, it will close its connection.
 Our Application sends messages through converting game objects into text, using sockets to send and recieve the message, 
 and then sends the text to a converter which creates game objects for the reciever. 
 For example, a gamestate is converted from various objects which hold gamestate data such as player queues into a single string,
-which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects. 
+which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects.
+
+In the tcpserver.c sockets are setup as following:
+![sockets1](https://user-images.githubusercontent.com/71346386/184566355-aeb5712b-5495-452b-bb9b-7c61e25dcae3.png)
+
+and then bound to the port
+
+![sockets2](https://user-images.githubusercontent.com/71346386/184566371-c6b76d7b-c613-420a-adc9-ddcff6d8e77b.png)
+allowing a client to connect by any of the servers interfaces.
+
+the server will then listen until a client connects, accepting 4 clients in total. the newly opened sockets will be added to a pollfd structure. 
+
+![sockets3](https://user-images.githubusercontent.com/71346386/184566613-ae2d5211-0a95-431a-80af-2673c8c4b69d.png)
+
+this structure will then use the poll system call to moniter for events from any of the clients, and recv the incoming messages to parse and pass to the GameLogic (represented by gameStructure).
+
+the shared object is handled in the server backend (gameStructure.c), where control over the gun is determined by whichever player enters five gun actions--control will then last for 5 "bullets", doubling the damage of each attack.
+
+![gun1](https://user-images.githubusercontent.com/71346386/184567559-9603308f-65eb-486d-88ad-62ce7261bdf0.png)
+
+![gun2](https://user-images.githubusercontent.com/71346386/184567572-2a887021-c7ee-41d1-96bd-9dafde55027e.png)
+
+
 
 ## Opening Sockets 
 See client_program/clientBackend.c
@@ -41,8 +63,8 @@ See server_program/tcpserver.c
 See server_program/gameStructures.c function applyTask()
 
 ## Group Members and their % contribution
-Ben de Goutiere - 20%  
-Kerem Sarisen - 20%  
-Mike Ostrowka - 20%  
-Andy Wang - 20%  
-Yosup Cheon - 20%  
+Ben de Goutiere - 20% (Server Frontend, GameLogic)
+Kerem Sarisen - 20%   (Game Logic)
+Mike Ostrowka - 20%   (Client Frontend, Client Backend)
+Andy Wang - 20%       (Socket setup)
+Yosup Cheon - 20%     (Client Frontend, Client Backend)
