@@ -94,18 +94,21 @@ int getStats(char *message) {
     //     printf("\nval is %ld\n ", (digitOne * 10) + digitTwo + digitZero);
     //     return (int)(digitOne * 10) + digitTwo + digitZero;
     // }
-    char *temp = malloc(10); //needed to satisfy strtol() requirements
-    memset(temp, 0, 10);
-    if(message[1] == ' ') {
-        strncpy(temp, message, 2);
-        temp[2] = '\0';
-    } else {
-        strncpy(temp, message, 3);
-        temp[3] = '\0';
-    }
-    printf("\ntemp is %s\n", temp);
+    // char *temp = malloc(10); //needed to satisfy strtol() requirements
+    // memset(temp, 0, 10);
     int ret;
-    sscanf(temp, "%d", &ret);
+    if(message[1] == ' ') {
+        sscanf(message, "%2d", &ret);
+        // strncpy(temp, message, 2);
+        // temp[2] = '\0';
+    } else {
+        sscanf(message, "%3d", &ret);
+        // strncpy(temp, message, 3);
+        // temp[3] = '\0';
+    }
+    // printf("\ntemp is %s\n", temp);
+
+    // sscanf(temp, "%d", &ret);
     // long ret = strtol(temp, &temp, 10);
     // free(temp);
     // printf("temp 0 = %c\n", temp[0]);
@@ -215,8 +218,7 @@ void updateGame (char * message, struct Game * game) {
         // else {
         //     message += 3;
         // }
-        message++;
-        message++;
+
         message += strlen(END_STATS) + 1;
         message += strlen(END_PLAYER) +1;
 
