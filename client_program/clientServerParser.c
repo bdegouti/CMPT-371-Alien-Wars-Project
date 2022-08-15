@@ -33,11 +33,10 @@ void getNextAction(char *message, struct PlayerQueue *queue) {
     move[strlen(ATT)] = '\0';
     message += strlen(ATT) + 1;
 
-    int target = message[0];
+    int target = message[0] - '0';
     message += 2;
-
     enqueueNewTask(queue, move, target);
-    free(move);
+    // free(move);
     move = NULL;
 }
 
@@ -87,7 +86,7 @@ void updateGame (char * message, struct Game * game) {
         message += 2; //slide pointer to start of queue
         message += strlen(QUEUE) + 1;
         while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
-            //getNextAction(message, game->players[playerNum]->queue);
+            getNextAction(message, game->players[playerNum]->queue);
             message += strlen(ATT) + 1;
             message += 2;
         } 
