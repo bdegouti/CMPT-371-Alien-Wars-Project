@@ -40,6 +40,12 @@ void getNextAction(char *message, struct PlayerQueue *queue) {
     move = NULL;
 }
 
+void clearTasks(struct Player *p) {
+    for(int i = 0; i < p->queue->size; i++) { 
+        dequeueCurrentTask(p->queue);
+    }
+}
+
 int getStats(char *message) {
     int ret;
     if(message[1] == ' ') {
@@ -85,6 +91,7 @@ void updateGame (char * message, struct Game * game) {
         message += strlen(PLAYER) + 1;
         message += 2; //slide pointer to start of queue
         message += strlen(QUEUE) + 1;
+        clearTasks(game->players[playerNum]);
         while(strncmp(message, END_QUEUE, strlen(END_QUEUE))) {
             getNextAction(message, game->players[playerNum]->queue);
             message += strlen(ATT) + 1;
