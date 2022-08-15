@@ -57,7 +57,7 @@ void* getCurrentGameState(void* game) {
 
         if (gameTemp->gameover){
             printf("test: gameover in recv\n");
-            free(gameStateMsg);
+            // free(gameStateMsg);
         }
         //sleep(1);
     }
