@@ -35,15 +35,15 @@ void displayGame(struct Game *game, struct PlayersInfo info) {
     if (game->gameover)
     {
         int winner = whoWon(game);
-        if (winner == '1' && (info.player == '1' || info.ally == '1'))
-        { // win
+        if (winner == 1 && (info.player == '1' || info.player == '2')) {
             printf("%s", GUI_WIN);
         }
-        else
-        { // lose
+        else if (winner == 2 && (info.player == '3' || info.player == '4')) {
+            printf("%s", GUI_WIN);
+        }
+        else{
             printf("%s", GUI_LOSE);
         }
-        return;
     }
     printf("\n\n\n");
     //printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
