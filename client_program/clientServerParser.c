@@ -112,6 +112,9 @@ void updateGame (char * message, struct Game * game) {
         }
 
         int gun = getStats(message);
+        if(gun == 0 && game->players[playerNum]->gun == 4) {
+            game->players[playerNum]->isBoostActive = true;
+        }
         game->players[playerNum]->gun = gun;
         if (gun >= 100)
         {

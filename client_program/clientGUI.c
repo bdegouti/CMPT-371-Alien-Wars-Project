@@ -4,6 +4,7 @@ const char *GUI_INTRO = "\n\033[32m************************\033[34mGAME STATS\03
 const char *GUI_YOUR_TEAM = "\t\t\t\033[32mYour Team\033[0m\n";
 const char *GUI_ENEMY_TEAM = "\t\t\t\033[31mEnemy Team\033[0m\n";
 const char *GUI_OUTRO = "\033[32m********************************************************************\033[0m\n";
+const char *BOOST = "Active";
 
 const char *GUI_WIN = "\033[32mYour team wins!!\033[0m\n";
 const char *GUI_LOSE = "\033[31mYour team lost ._.\033[0m\n";
@@ -11,8 +12,14 @@ const char *GUI_LOSE = "\033[31mYour team lost ._.\033[0m\n";
 void displayGame(struct Game *game, struct PlayersInfo info) {
     printf("%s%s", GUI_INTRO, GUI_YOUR_TEAM);
     printf("Your health:%s\t%d\t\t\t\t%sAlly health:%s\t%d%s\n", THEME_CODES[green], game->players[info.player -'1']->health, CLEAR_CODE, THEME_CODES[green], game->players[info.ally -'1']->health, CLEAR_CODE);
-    printf("Your gun:\t%s%d\t\t\t\t%sAlly gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.player -'1']->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.ally -'1']->gun, CLEAR_CODE);
-    
+    if(game->players[info.player -'1']->isBoostActive) {
+        printf("Your gun:\t%s%s\t\t\t\t%sAlly gun:\t%s%d%s\n", THEME_CODES[blue], BOOST, CLEAR_CODE, THEME_CODES[blue], game->players[info.ally - '1']->gun, CLEAR_CODE);
+    } else if(game->players[info.player -'1']->isBoostActive) {
+        printf("Your gun:\t%s%d\t\t\t\t%sAlly gun:\t%s%s%s\n", THEME_CODES[blue], game->players[info.player - '1']->gun, CLEAR_CODE, THEME_CODES[blue], BOOST, CLEAR_CODE);
+    } else {
+        printf("Your gun:\t%s%d\t\t\t\t%sAlly gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.player -'1']->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.ally -'1']->gun, CLEAR_CODE);
+    }
+
     char *playerQueue = getQueueAsString(game->players[info.player -'1']);
     char *allyQueue = getQueueAsString(game->players[info.ally -'1']);
     char *enemy1Queue = getQueueAsString(game->players[info.enemy1 -'1']);
@@ -22,7 +29,13 @@ void displayGame(struct Game *game, struct PlayersInfo info) {
     printf("Ally queue:\033[33m\t%s%s\n\n", allyQueue, CLEAR_CODE);
     printf("%s", GUI_ENEMY_TEAM);
     printf("Enemy 1 health:%s\t%d\t\t\t\t%sEnemy 2 health:\t%s%d%s\n", THEME_CODES[green], game->players[info.enemy1 -'1']->health, CLEAR_CODE, THEME_CODES[green], game->players[info.enemy2 -'1']->health, CLEAR_CODE);
-    printf("Enemy 1 gun:%s\t%d\t\t\t\t%sEnemy 2 gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.enemy1 -'1']->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.enemy2 -'1']->gun, CLEAR_CODE);
+    if(game->players[info.enemy1 -'1']->isBoostActive) {
+        printf("Enemy 1 gun:%s\t%s\t\t\t\t%sEnemy 2 gun:\t%s%d%s\n", THEME_CODES[blue], BOOST, CLEAR_CODE, THEME_CODES[blue], game->players[info.enemy2 - '1']->gun, CLEAR_CODE);
+    } else if(game->players[info.enemy2 -'1']->isBoostActive) {
+        printf("Enemy 1 gun:%s\t%d\t\t\t\t%sEnemy 2 gun:\t%s%s%s\n", THEME_CODES[blue], game->players[info.enemy1 - '1']->gun, CLEAR_CODE, THEME_CODES[blue], BOOST, CLEAR_CODE);
+    } else {
+        printf("Enemy 1 gun:%s\t%d\t\t\t\t%sEnemy 2 gun:\t%s%d%s\n", THEME_CODES[blue], game->players[info.enemy1 -'1']->gun, CLEAR_CODE, THEME_CODES[blue], game->players[info.enemy2 -'1']->gun, CLEAR_CODE);
+    }
     printf("Enemy 1 queue:\033[33m\t%s%s\n", enemy1Queue, CLEAR_CODE);
     printf("Enemy 2 queue:\033[33m\t%s%s\n", enemy2Queue, CLEAR_CODE);
 
