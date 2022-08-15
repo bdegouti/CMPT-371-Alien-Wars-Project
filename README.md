@@ -31,7 +31,21 @@ When a client recieves a game over gamestate, it will close its connection.
 Our Application sends messages through converting game objects into text, using sockets to send and recieve the message, 
 and then sends the text to a converter which creates game objects for the reciever. 
 For example, a gamestate is converted from various objects which hold gamestate data such as player queues into a single string,
-which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects. 
+which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects.
+
+In the tcpserver sockets are setup as following:
+![sockets1](https://user-images.githubusercontent.com/71346386/184566355-aeb5712b-5495-452b-bb9b-7c61e25dcae3.png)
+
+and then bound to the port
+
+![sockets2](https://user-images.githubusercontent.com/71346386/184566371-c6b76d7b-c613-420a-adc9-ddcff6d8e77b.png)
+allowing a client to connect by any of the servers interfaces.
+
+the server will then listen until a client connects, accepting 4 clients in total. the newly opened sockets will be added to a pollfd structure. 
+![sockets3](https://user-images.githubusercontent.com/71346386/184566613-ae2d5211-0a95-431a-80af-2673c8c4b69d.png)
+this structure will then use the poll system call to moniter for events from any of the clients, and recv the incoming messages to parse and pass to the GameLogic (represented by gameStructure).
+
+
 
 ## Opening Sockets 
 See client_program/clientBackend.c
