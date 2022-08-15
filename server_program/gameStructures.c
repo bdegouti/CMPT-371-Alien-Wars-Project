@@ -213,7 +213,7 @@ char* getQueueAsString(struct Player *p) {
         str[1] = '\0';
         return str;
     } 
-    str = (char *)malloc(p->queue->size * 8);
+    str = (char *)malloc(p->queue->size * 9);
     
     struct Action *temp = p->queue->head;
     char tempTargetNum[SMALL_BUFFER];
