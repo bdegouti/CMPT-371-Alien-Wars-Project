@@ -53,15 +53,6 @@ the shared object is handled in the server backend (gameStructure.c), where cont
 
 ![gun2](https://user-images.githubusercontent.com/71346386/184567572-2a887021-c7ee-41d1-96bd-9dafde55027e.png)
 
-
-
-## Opening Sockets 
-See client_program/clientBackend.c
-See server_program/tcpserver.c
-
-## Handling Shared Object
-See server_program/gameStructures.c function applyTask()
-
 ## Group Members and their % contribution
 Ben de Goutiere - 20% (Server Frontend, GameLogic)
 Kerem Sarisen - 20%   (Game Logic)
