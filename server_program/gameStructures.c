@@ -110,10 +110,7 @@ void endGameState(struct Game *g){
 }
 
 void addActionToPlayer(struct Game *g, int playerNum, char *action, int target){
-    if (playerNum <= NUM_OF_PLAYERS)
-    {
-        enqueueNewTask(g->players[playerNum-1]->queue, action, target);
-    }
+    enqueueNewTask(g->players[playerNum-1]->queue, action, target);
 }
 
 //randomizes which player goes first.
@@ -185,7 +182,7 @@ void applyTask(struct Game *g, struct Player *p, struct Action *a){
         else if (strcmp(a->action, "gun") == 0){  // ANDY CLIENTTOSERVERAPI please change boost to gun 
             if(g->gunlocked == false){
                 if(p->gun < MAX_GUN_FILL){
-                    p->gun++;
+                    p->gun += 1;
                 }
                 if (p->gun == MAX_GUN_FILL){
                     for(int i = 0; i < NUM_OF_PLAYERS; i++){
