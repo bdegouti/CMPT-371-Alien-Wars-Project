@@ -25,8 +25,15 @@ void playGame(struct PlayersInfo playersInfo, struct Game* game) {
    pthread_create(&sendThread, NULL, sendToServer, (void*) game);
    pthread_create(&recvThread, NULL, getCurrentGameState, (void*) game);
 
-   pthread_join(sendThread, NULL);
-   pthread_join(recvThread, NULL);
+   //pthread_join(sendThread, NULL);
+   //pthread_join(recvThread, NULL);
+   if (pthread_join(recvThread, NULL) == 0){
+       printf("recv ends\n");
+       pthread_cancel(sendThread);
+   }
+   else {
+       printf("error in terminate pthread client side\n");
+   }
 }
 
 int main(int argc, char *argv[]) {

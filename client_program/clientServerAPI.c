@@ -25,19 +25,13 @@ void* sendToServer(void* game) {
     struct Game* gameTemp = (struct Game*)game;
 
     while (gameTemp->gameover == false){
+
+
         char* userAction = getUserAction(playersInfoInClientBack);
-        
-        // mutex send may not be necessary???
-        pthread_mutex_lock(&mutex);
+
         sendAction(userAction);
-        pthread_mutex_unlock(&mutex);
-        //sleep(1);
 
-        free(userAction);
-
-        if (gameTemp->gameover){
-            printf("game over in send\n");
-        }        
+        free(userAction);       
     }
 
     return NULL;
@@ -47,20 +41,16 @@ void* getCurrentGameState(void* game) {
     struct Game* gameTemp = (struct Game*)game;
 
     while (gameTemp->gameover == false){
+
+
         char* gameStateMsg = recvState();
-        //printf("in client = %s\n", gameStateMsg);
 
         pthread_mutex_lock(&mutex);
         gameTemp = parseServer(gameStateMsg, gameTemp);
-        displayGame(gameTemp, playersInfoInClientBack);
         pthread_mutex_unlock(&mutex);
-
-        if (gameTemp->gameover){
-            printf("test: gameover in recv\n");
-            // free(gameStateMsg);
-        }
-        //sleep(1);
+        displayGame(gameTemp, playersInfoInClientBack);
     }
 
    return NULL;
 }
+
