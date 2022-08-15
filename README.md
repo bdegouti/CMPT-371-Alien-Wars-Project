@@ -33,8 +33,11 @@ and then sends the text to a converter which creates game objects for the reciev
 For example, a gamestate is converted from various objects which hold gamestate data such as player queues into a single string,
 which starts off discribing the gamestate, then listing specific data. This super string is then sent with sockets to the reciever, who takes a string and converts it into game objects.
 
-In the server sockets are setup as following:
+In the tcpserver sockets are setup as following:
 ![sockets1](https://user-images.githubusercontent.com/71346386/184566355-aeb5712b-5495-452b-bb9b-7c61e25dcae3.png)
+
+and then bound to the port
+
 ![sockets2](https://user-images.githubusercontent.com/71346386/184566371-c6b76d7b-c613-420a-adc9-ddcff6d8e77b.png)
 allowing a client to connect by any of the servers interfaces.
 
