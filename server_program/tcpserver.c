@@ -1,4 +1,3 @@
-//gcc -pthread -o tcpserver tcpserver.c gameStructures.c to compile
 #include <stdio.h>
 #include <errno.h> // Errors 
 #include <stdlib.h>
@@ -12,7 +11,6 @@
 #include <netinet/in.h>
 #include <netdb.h> // getaddrinfo, gai_strerror
 #include <signal.h>
-
 #include "gameStructures.h"
 #include "client_to_server_api.c"
 
@@ -22,19 +20,16 @@
 #define SERVER_PORT "8080" //Server port number
 #define SERVER_PORT_AS_INT 8080 // not used in currrent setup
 #define SERVER_ADDR "24.207.13.89" //not used in current setup
-#define TURN_LENGTH 5 //length of turn (secs)
-#define GAME__DOESNT_DELAY_START true
+#define TURN_LENGTH 10 //length of turn (secs)
+#define GAME__DOESNT_DELAY_START true //determines whether server waits for player readiness
+#define GAME_START_MESSAGE "GameStarted" //not used in current setup
 
-#define ALL_PLAYER_ARRIVED_MESSAGE  "AllPlayersHere"
-#define GAME_START_MESSAGE "GameStarted"
-
-pthread_mutex_t canAccessGameData;
-
-//for sending mulltiple args through pthread_create
 struct argsToThread {
     struct Game* g;
     struct pollfd* socks;
 };
+
+pthread_mutex_t canAccessGameData;
 
 void exit_if_error(int status, char* error_message) {
     if (status == -1) {
@@ -270,7 +265,12 @@ void runGame(struct pollfd** serverSockets){
                     //using the mutex to ensure that the game struct is accessed in a thread safe manner
                     pthread_mutex_lock(&canAccessGameData);
                     interpretPlayerMessage(game, i+1, buffer);
+                    if(game->gameover){
+                        GameNotEnded = false;
+                        break;
+                    }
                     pthread_mutex_unlock(&canAccessGameData);
+
                 }
                 else{
                     if(!playerIsReady[i]){
